@@ -57,7 +57,7 @@ public class QuizService {
 
         // Filter by current adaptive difficulty if matching questions exist, or take all
         List<Question> filtered = questions.stream()
-                .filter(q -> q.getDifficulty() == currentDifficulty)
+                .filter(q -> q.getDifficulty() == current Difficulty)
                 .collect(Collectors.toList());
         if (filtered.isEmpty()) {
             filtered = questions; // Fallback to all questions for this topic
@@ -99,10 +99,12 @@ public class QuizService {
 
         for (AssessmentDtos.AnswerSubmission sub : request.getAnswers()) {
             Question question = questionMap.get(sub.getQuestionId());
-            if (question == null) continue;
+            if (question == null)
+                continue;
 
             boolean isCorrect = Objects.equals(question.getCorrectOptionIndex(), sub.getSelectedOptionIndex());
-            if (isCorrect) correctCount++;
+            if (isCorrect)
+                correctCount++;
 
             Answer answer = Answer.builder()
                     .question(question)
@@ -192,8 +194,10 @@ public class QuizService {
         recommendationService.generateRecommendationsForUser(user);
 
         String feedbackMessage = passed
-                ? "Great job! You passed with " + String.format("%.1f", percentage) + "%. Next recommended tier: " + nextDifficulty
-                : "Keep practicing! You scored " + String.format("%.1f", percentage) + "%. Review the explanations below and try again.";
+                ? "Great job! You passed with " + String.format("%.1f", percentage) + "%. Next recommended tier: "
+                        + nextDifficulty
+                : "Keep practicing! You scored " + String.format("%.1f", percentage)
+                        + "%. Review the explanations below and try again.";
 
         return QuizResultDto.builder()
                 .attemptId(savedAttempt.getId())
@@ -217,7 +221,8 @@ public class QuizService {
                 .map(qa -> QuizHistoryItemDto.builder()
                         .attemptId(qa.getId())
                         .topicId(qa.getTopic() != null ? qa.getTopic().getId() : null)
-                        .topicTitle(qa.getTopic() != null ? qa.getTopic().getTitle() : (qa.getAssessment() != null ? qa.getAssessment().getTitle() : "Assessment"))
+                        .topicTitle(qa.getTopic() != null ? qa.getTopic().getTitle()
+                                : (qa.getAssessment() != null ? qa.getAssessment().getTitle() : "Assessment"))
                         .score(qa.getScore())
                         .totalQuestions(qa.getTotalQuestions())
                         .percentage(qa.getPercentage())
@@ -230,7 +235,8 @@ public class QuizService {
 
     private List<String> parseOptionsJson(String json) {
         try {
-            return objectMapper.readValue(json, new TypeReference<List<String>>() {});
+            return objectMapper.readValue(json, new TypeReference<List<String>>() {
+            });
         } catch (Exception e) {
             return List.of("Option A", "Option B", "Option C", "Option D");
         }
