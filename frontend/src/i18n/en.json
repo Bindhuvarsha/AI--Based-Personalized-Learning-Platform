@@ -1,0 +1,57 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "mentor": "AI Mentor",
+    "voiceTutor": "Voice Tutor",
+    "knowledgeGraph": "Knowledge Graph",
+    "imageSolver": "Image Solver",
+    "codingTutor": "Coding Tutor",
+    "behaviorPrediction": "Study Analytics & Risk",
+    "adaptiveQuiz": "Adaptive Quizzes",
+    "assignments": "Assignments",
+    "gamification": "Gamification",
+    "studyGroups": "Study Groups",
+    "studyPlanner": "Study Planner",
+    "careerRoadmap": "Career Roadmap",
+    "resumeAnalyzer": "Resume Analyzer",
+    "earlyWarning": "Early Warning",
+    "courses": "Courses",
+    "tutor": "RAG Tutor",
+    "profile": "Profile",
+    "logout": "Sign Out"
+  },
+  "mentor": {
+    "title": "AI Personal Mentor",
+    "subtitle": "Your 24/7 dedicated coach for career guidance, study pace, and knowledge gap resolution",
+    "askPlaceholder": "Ask your mentor anything about your study path, career goals, or difficulty...",
+    "dailyAdvice": "Today's Guidance",
+    "weeklyReview": "Weekly Progress Review",
+    "evidenceTitle": "Evidence & Analytics Cited"
+  },
+  "voice": {
+    "title": "Voice AI Tutor",
+    "subtitle": "Speak your questions naturally and listen to spoken explanations with source citations",
+    "record": "Start Speaking",
+    "stop": "Stop & Process",
+    "transcript": "Your Question Transcript",
+    "aiAnswer": "Spoken Tutor Explanation"
+  },
+  "graph": {
+    "title": "Interactive Knowledge Graph",
+    "subtitle": "Explore prerequisite dependency networks, concept masteries, and unlockable topics",
+    "mastered": "Mastered",
+    "developing": "Developing",
+    "weak": "Needs Practice",
+    "locked": "Locked",
+    "recommended": "Recommended Next"
+  },
+  "common": {
+    "loading": "Loading...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "save": "Save Changes",
+    "points": "XP",
+    "streak": "Day Streak"
+  }
+}

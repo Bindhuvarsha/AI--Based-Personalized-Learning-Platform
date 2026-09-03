@@ -310,3 +310,421 @@ export interface AnalyticsDashboard {
   strongTopics: StrongTopicItem[];
   knowledgeDistribution: KnowledgeDistribution;
 }
+
+// 1. Knowledge Graph
+export interface GraphNode {
+  id: number;
+  code: string;
+  name: string;
+  category: string;
+  difficulty: string;
+  masteryScore: number;
+  status: 'MASTERED' | 'DEVELOPING' | 'WEAK' | 'LOCKED' | 'RECOMMENDED';
+  estimatedHours: number;
+  courseId?: number;
+}
+
+export interface GraphEdge {
+  id: number;
+  source: string;
+  target: string;
+  relationType: string;
+}
+
+export interface KnowledgeGraphResponse {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  totalConcepts: number;
+  masteredCount: number;
+  weakCount: number;
+  developingCount: number;
+}
+
+// 2. AI Personal Mentor
+export interface MentorProfile {
+  persona: string;
+  learningGoal: string;
+  targetCareer: string;
+  weeklyStudyTargetHours: number;
+  tone: string;
+}
+
+export interface MentorRecommendationItem {
+  id: number;
+  title: string;
+  reason: string;
+  actionType: string;
+  actionPayload?: string;
+  priority: number;
+  isActioned: boolean;
+}
+
+export interface MentorChatResponse {
+  reply: string;
+  language: string;
+  evidenceCited: string[];
+  recommendations: MentorRecommendationItem[];
+  timestamp: string;
+}
+
+export interface DailyAdviceResponse {
+  date: string;
+  greeting: string;
+  dailyGoal: string;
+  rationale: string;
+  priorityTopics: string[];
+  motivationalQuote: string;
+  streakDays: number;
+  recommendations: MentorRecommendationItem[];
+}
+
+export interface WeeklyReviewResponse {
+  totalStudyHours: number;
+  conceptsMastered: number;
+  quizAverage: number;
+  velocityAssessment: string;
+  areasToReview: string[];
+  nextWeekFocus: string[];
+}
+
+// 3. Voice AI Tutor
+export interface VoiceProcessResponse {
+  sessionId: number;
+  userTranscript: string;
+  aiResponseText: string;
+  audioUrl: string;
+  durationSeconds: number;
+  language: string;
+  sources: string[];
+}
+
+export interface VoiceMessageItem {
+  id: number;
+  speaker: 'user' | 'ai';
+  transcript: string;
+  audioUrl?: string;
+  durationSeconds: number;
+  language: string;
+  createdAt: string;
+}
+
+export interface VoiceSessionDetails {
+  sessionId: number;
+  sessionTitle: string;
+  startedAt: string;
+  messages: VoiceMessageItem[];
+}
+
+// 4. Image Question Solver
+export interface ImageSolveResponse {
+  questionId: number;
+  originalFilename: string;
+  imageUrl: string;
+  extractedText: string;
+  ocrConfidence: number;
+  stepByStepExplanation: string;
+  finalAnswer: string;
+  formulaDerivations: string[];
+  relatedTopics: string[];
+  solutionConfidence: number;
+  disclaimer: string;
+}
+
+export interface ImageHistoryItem {
+  id: number;
+  originalFilename: string;
+  imageUrl: string;
+  extractedSnippet: string;
+  finalAnswerSnippet: string;
+  uploadedAt: string;
+}
+
+// 5. Behavior Prediction
+export interface BehaviorPredictionResponse {
+  riskCategory: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
+  struggleProbability: number;
+  contributingFactors: string[];
+  recommendedIntervention: string;
+  modelVersion: string;
+  disclaimer: string;
+  avgQuizScore: number;
+  scoreTrendSlope: number;
+  inactivityDays: number;
+  completionRate: number;
+  predictedAt: string;
+}
+
+// 6. Adaptive Quiz
+export interface AdaptiveSessionStart {
+  sessionId: number;
+  topicId: number;
+  topicTitle: string;
+  currentDifficulty: string;
+  firstQuestion: Question;
+  questionNumber: number;
+  totalPlannedQuestions: number;
+}
+
+export interface AdaptiveSubmitResponse {
+  isCorrect: boolean;
+  explanation: string;
+  previousDifficulty: string;
+  currentDifficulty: string;
+  difficultyChanged: boolean;
+  changeReason: string;
+  nextQuestion?: Question;
+  isQuizCompleted: boolean;
+  currentScore: number;
+  totalAnswered: number;
+  currentMasteryScore: number;
+}
+
+// 7. Assignments
+export interface RubricItem {
+  id: number;
+  criterionName: string;
+  maxPoints: number;
+  description: string;
+}
+
+export interface AssignmentSummary {
+  id: number;
+  courseId?: number;
+  title: string;
+  description: string;
+  maxScore: number;
+  dueDate?: string;
+  rubrics: RubricItem[];
+  submissionStatus: string;
+  earnedScore?: number;
+}
+
+export interface EvaluationResultData {
+  submissionId: number;
+  overallScore: number;
+  maxScore: number;
+  percentage: number;
+  strengths: string[];
+  weaknesses: string[];
+  missingConcepts: string[];
+  quotedEvidence: string[];
+  improvementSuggestions: string;
+  isOverriddenByTeacher: boolean;
+  teacherOverriddenScore?: number;
+  teacherComments?: string;
+  evaluatedAt: string;
+}
+
+// 8. Coding Tutor
+export interface CodingExerciseItem {
+  id: number;
+  title: string;
+  description: string;
+  language: string;
+  difficulty: string;
+  starterCode: string;
+  testCasesJson: string;
+}
+
+export interface CodeRunResult {
+  submissionId: number;
+  executionStatus: string;
+  stdout: string;
+  stderr: string;
+  executionTimeMs: number;
+  memoryKb: number;
+  syntaxErrors: string[];
+  codeSmells: string[];
+  securityConcerns: string[];
+  timeComplexity: string;
+  spaceComplexity: string;
+  suggestions: string;
+  correctedCodeDiff: string;
+  allTestsPassed: boolean;
+}
+
+// 9. Gamification
+export interface BadgeData {
+  code: string;
+  name: string;
+  description: string;
+  iconName: string;
+  badgeType: string;
+  xpBonus: number;
+  isUnlocked: boolean;
+  unlockedAt?: string;
+}
+
+export interface XPTransactionItem {
+  id: number;
+  xpAmount: number;
+  reason: string;
+  awardedAt: string;
+}
+
+export interface GamificationProfile {
+  currentLevel: number;
+  currentXp: number;
+  nextLevelXpRequired: number;
+  title: string;
+  levelProgressPercent: number;
+  currentStreakDays: number;
+  longestStreakDays: number;
+  badges: BadgeData[];
+  recentTransactions: XPTransactionItem[];
+}
+
+export interface LeaderboardUserEntry {
+  rank: number;
+  userId: number;
+  studentName: string;
+  level: number;
+  totalXp: number;
+  isCurrentUser: boolean;
+}
+
+export interface LeaderboardData {
+  period: string;
+  entries: LeaderboardUserEntry[];
+  currentUserRank: number;
+}
+
+// 10. Study Groups
+export interface StudyGroupItem {
+  id: number;
+  name: string;
+  description: string;
+  topicFocus: string;
+  targetCareer: string;
+  language: string;
+  memberCount: number;
+  maxMembers: number;
+  isJoined: boolean;
+  isOwner: boolean;
+}
+
+export interface GroupChatMessage {
+  id: number;
+  senderId: number;
+  senderName: string;
+  content: string;
+  isCurrentUser: boolean;
+  sentAt: string;
+}
+
+// 11. Study Planner
+export interface StudySessionItem {
+  id: number;
+  title: string;
+  sessionDate: string;
+  startTime?: string;
+  durationMinutes: number;
+  sessionType: string;
+  isCompleted: boolean;
+  explanationScheduled?: string;
+}
+
+export interface WeeklyScheduleData {
+  weekStartDate: string;
+  weekEndDate: string;
+  totalPlannedMinutes: number;
+  completedMinutes: number;
+  sessions: StudySessionItem[];
+}
+
+// 12. Early Warning
+export interface EarlyWarningAlert {
+  id: number;
+  warningType: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  evidenceText: string;
+  recommendedAction: string;
+  isDismissed: boolean;
+  createdAt: string;
+}
+
+export interface InAppNotification {
+  id: number;
+  title: string;
+  message: string;
+  notificationType: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+// 13. Career Roadmap
+export interface CareerPathItem {
+  id: number;
+  title: string;
+  description: string;
+  averageSalaryRange: string;
+  industryDemand: string;
+  icon: string;
+}
+
+export interface CareerRoadmapCheckItem {
+  id: number;
+  title: string;
+  category: string;
+  orderIndex: number;
+  isCompleted: boolean;
+  conceptCode?: string;
+}
+
+export interface PortfolioProjectItem {
+  id: number;
+  title: string;
+  description: string;
+  skillsCovered: string;
+  starterRepoUrl?: string;
+  difficulty: string;
+}
+
+export interface CareerRoadmapDetails {
+  roadmapId: number;
+  careerTitle: string;
+  careerDescription: string;
+  readinessScore: number;
+  estimatedWeeks: number;
+  items: CareerRoadmapCheckItem[];
+  portfolioProjects: PortfolioProjectItem[];
+}
+
+// 14. Resume Skill Gap
+export interface ExtractedSkillItem {
+  id: number;
+  skillName: string;
+  category: string;
+  evidenceText: string;
+  isVerified: boolean;
+}
+
+export interface ResumeUploadData {
+  documentId: number;
+  filename: string;
+  extractedSkillsCount: number;
+  previewText: string;
+  extractedSkills: ExtractedSkillItem[];
+}
+
+export interface SkillGapItem {
+  skill: string;
+  status: 'MATCHED' | 'PARTIAL' | 'MISSING';
+  evidenceOrAction: string;
+}
+
+export interface ResumeRecItem {
+  title: string;
+  category: string;
+  recommendationText: string;
+}
+
+export interface SkillGapAnalysisData {
+  analysisId: number;
+  jobTitle: string;
+  matchPercentage: number;
+  matchedSkills: SkillGapItem[];
+  partialSkills: SkillGapItem[];
+  missingSkills: SkillGapItem[];
+  recommendations: ResumeRecItem[];
+}

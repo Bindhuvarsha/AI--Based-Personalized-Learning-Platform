@@ -55,10 +55,13 @@ public class QuizService {
             throw new BadRequestException("No questions available for this topic yet.");
         }
 
-        // Filter by current adaptive difficulty if matching questions exist, or take all
-        List<Question> filtered = questions.stream()
-                .filter(q -> q.getDifficulty() == current Difficulty)
-                .collect(Collectors.toList());
+        final DifficultyLevel targetDifficulty = currentDifficulty;
+        List<Question> filtered = new ArrayList<>();
+        for (Question q : questions) {
+            if (q.getDifficulty() == targetDifficulty) {
+                filtered.add(q);
+            }
+        }
         if (filtered.isEmpty()) {
             filtered = questions; // Fallback to all questions for this topic
         }
