@@ -5,11 +5,11 @@ import { Sidebar } from './Sidebar';
 
 export const DashboardLayout: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative overflow-x-hidden">
       <Navbar />
-      <div className="flex flex-1">
+      <div className="flex flex-1 relative">
         <Sidebar />
-        <main className="flex-1 p-6 bg-slate-50 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto relative z-10">
           <Outlet />
         </main>
       </div>

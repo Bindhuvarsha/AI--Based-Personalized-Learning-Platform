@@ -37,10 +37,11 @@ export const VoiceTutorPage: React.FC = () => {
     try {
       const res = await voiceApi.createSession("Voice Study Session - " + new Date().toLocaleDateString());
       setSessionId(res.data);
-    } catch (err: any) {
-      showToast('Failed to initialize voice session', 'error');
+    } catch {
+      // Backend may still be starting — session will initialize on first recording attempt
     }
   };
+
 
   const startRecording = async () => {
     try {

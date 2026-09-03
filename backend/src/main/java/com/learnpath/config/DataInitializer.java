@@ -3,6 +3,8 @@ package com.learnpath.config;
 import com.learnpath.model.entity.*;
 import com.learnpath.model.enums.*;
 import com.learnpath.repository.*;
+import com.learnpath.repository.CareerRequirementRepository;
+import com.learnpath.repository.EvaluationRubricRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

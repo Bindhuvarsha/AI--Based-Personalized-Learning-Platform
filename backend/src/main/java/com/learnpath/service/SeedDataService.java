@@ -11,10 +11,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.context.annotation.Profile;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@Profile("!prod")
 @RequiredArgsConstructor
 @Slf4j
 public class SeedDataService implements CommandLineRunner {
@@ -36,36 +39,58 @@ public class SeedDataService implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        if (roleRepository.count() > 0 && userRepository.count() > 0) {
-            log.info("Database already seeded. Skipping initial seeding.");
+        log.info("Starting LearnPath AI development database seed...");
+
+        // 1. Seed Roles safely
+        Role studentRole = roleRepository.findByName(RoleType.ROLE_STUDENT)
+                .orElseGet(() -> roleRepository.save(Role.builder().name(RoleType.ROLE_STUDENT).build()));
+        Role adminRole = roleRepository.findByName(RoleType.ROLE_ADMIN)
+                .orElseGet(() -> roleRepository.save(Role.builder().name(RoleType.ROLE_ADMIN).build()));
+
+        // 2. Seed/Verify Admin User: admin@example.com / Admin@123
+        final Role finalAdminRole = adminRole;
+        final Role finalStudentRole = studentRole;
+        User adminUser = userRepository.findByEmail("admin@example.com")
+                .map(existing -> {
+                    existing.setPassword(passwordEncoder.encode("Admin@123"));
+                    existing.setActive(true);
+                    existing.getRoles().add(finalAdminRole);
+                    existing.getRoles().add(finalStudentRole);
+                    return userRepository.save(existing);
+                })
+                .orElseGet(() -> userRepository.save(User.builder()
+                        .fullName("System Administrator")
+                        .email("admin@example.com")
+                        .password(passwordEncoder.encode("Admin@123"))
+                        .active(true)
+                        .roles(new HashSet<>(Set.of(finalAdminRole, finalStudentRole)))
+                        .build()));
+
+        // 3. Seed/Verify Student User: student@example.com / Student@123
+        User studentUser = userRepository.findByEmail("student@example.com")
+                .map(existing -> {
+                    existing.setPassword(passwordEncoder.encode("Student@123"));
+                    existing.setActive(true);
+                    existing.getRoles().add(finalStudentRole);
+                    return userRepository.save(existing);
+                })
+                .orElseGet(() -> userRepository.save(User.builder()
+                        .fullName("Alex Chen (Demo Learner)")
+                        .email("student@example.com")
+                        .password(passwordEncoder.encode("Student@123"))
+                        .active(true)
+                        .roles(new HashSet<>(Set.of(finalStudentRole)))
+                        .build()));
+        User savedStudent = studentUser;
+
+        // Skip remaining course/topic seeding if already populated
+        if (courseRepository.count() > 0) {
+            log.info("Courses and curriculum data already seeded. Seed data ready.");
+            log.info("Demo accounts verified:");
+            log.info("  Admin:   ID={}, email=admin@example.com   / Admin@123   (Development only)", adminUser.getId());
+            log.info("  Student: ID={}, email=student@example.com / Student@123 (Development only)", studentUser.getId());
             return;
         }
-
-        log.info("Starting LearnPath AI initial database seed...");
-
-        // 1. Seed Roles
-        Role studentRole = roleRepository.save(Role.builder().name(RoleType.ROLE_STUDENT).build());
-        Role adminRole = roleRepository.save(Role.builder().name(RoleType.ROLE_ADMIN).build());
-
-        // 2. Seed Admin User: admin@example.com / Admin@123
-        User adminUser = User.builder()
-                .fullName("System Administrator")
-                .email("admin@example.com")
-                .password(passwordEncoder.encode("Admin@123"))
-                .active(true)
-                .roles(Set.of(adminRole, studentRole))
-                .build();
-        userRepository.save(adminUser);
-
-        // 3. Seed Student User: student@example.com / Student@123
-        User studentUser = User.builder()
-                .fullName("Alex Chen (Demo Learner)")
-                .email("student@example.com")
-                .password(passwordEncoder.encode("Student@123"))
-                .active(true)
-                .roles(Set.of(studentRole))
-                .build();
-        User savedStudent = userRepository.save(studentUser);
 
         // 4. Seed Student Profile
         StudentProfile profile = StudentProfile.builder()

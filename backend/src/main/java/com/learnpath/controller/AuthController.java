@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 @Tag(name = "Authentication", description = "Endpoints for user registration, login, token refresh, and logout")
 public class AuthController {
 
@@ -29,7 +30,10 @@ public class AuthController {
     @PostMapping("/login")
     @Operation(summary = "Authenticate user with email and password")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+        log.info("[AUTH-LOGIN] Incoming login request for email: {}", request.getEmail());
+        AuthResponse response = authService.login(request);
+        log.info("[AUTH-LOGIN] Login SUCCESS for email: {}, userId: {}", request.getEmail(), response.getUser().getId());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/refresh")

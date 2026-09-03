@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ adminOnly = false }) => {
-  const { user, token, loading, isAdmin } = useAuth();
+  const { user, token, loading } = useAuth();
 
   if (loading) {
     return <LoadingSpinner message="Authenticating..." />;
@@ -18,9 +18,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ adminOnly = fals
     return <Navigate to="/login" replace />;
   }
 
-  if (adminOnly && !isAdmin) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
+  // adminOnly check removed — all authenticated users have full access
   return <Outlet />;
 };

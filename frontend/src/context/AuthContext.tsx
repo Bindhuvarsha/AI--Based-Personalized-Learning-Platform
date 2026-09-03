@@ -30,8 +30,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           const resp = await api.get<UserSummary>('/auth/me');
           setUser(resp.data);
           localStorage.setItem('user', JSON.stringify(resp.data));
-        } catch {
-          logout();
+        } catch (err: any) {
+          // Only force logout if the backend explicitly rejected the token with 401
+          // Do not kick user out on network failure or when backend is offline
+          if (err.response?.status === 401) {
+            logout();
+          }
         }
       }
       setLoading(false);

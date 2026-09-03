@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,11 +9,12 @@ export const api = axios.create({
   },
 });
 
-// Request interceptor: attach Bearer token
+// Request interceptor: attach Bearer token (except on login/register)
 api.interceptors.request.use(
   (config) => {
+    const isAuthEndpoint = config.url?.includes('/auth/login') || config.url?.includes('/auth/register');
     const token = localStorage.getItem('accessToken');
-    if (token && config.headers) {
+    if (token && config.headers && !isAuthEndpoint) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -21,12 +22,16 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor: auto-refresh token on 401
+// Response interceptor: auto-refresh token on 401 (excluding auth endpoints)
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const isAuthEndpoint = originalRequest?.url?.includes('/auth/login') ||
+                           originalRequest?.url?.includes('/auth/register') ||
+                           originalRequest?.url?.includes('/auth/refresh');
+
+    if (error.response?.status === 401 && !originalRequest?._retry && !isAuthEndpoint) {
       originalRequest._retry = true;
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken) {

@@ -89,23 +89,34 @@ public class AuthService {
         return authenticateUser(request.getEmail(), request.getPassword());
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         return authenticateUser(request.getEmail(), request.getPassword());
     }
 
-    private AuthResponse authenticateUser(String email, String password) {
+    @Transactional
+    public AuthResponse authenticateUser(String email, String password) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email.toLowerCase().trim(), password)
         );
 
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserPrincipal)) {
+            throw new BadRequestException("Authentication failed: invalid user credentials");
+        }
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-        String accessToken = jwtService.generateToken(authentication);
-        RefreshToken refreshToken = createRefreshToken(userPrincipal.getId());
+        if (userPrincipal.getId() == null) {
+            throw new BadRequestException("Authentication failed: user identifier is missing");
+        }
 
+        // Verify user exists in database; fail with clear authentication error before creating tokens
         User user = userRepository.findById(userPrincipal.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new BadRequestException("Authentication failed: user record not found"));
+
+        String accessToken = jwtService.generateToken(authentication);
+        RefreshToken refreshToken = createRefreshToken(user);
 
         boolean onboardingCompleted = user.getStudentProfile() != null &&
                 user.getStudentProfile().getLearningGoals() != null &&
@@ -129,16 +140,10 @@ public class AuthService {
     }
 
     @Transactional
-    public RefreshToken createRefreshToken(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
-
-        // Revoke existing token if any
-        refreshTokenRepository.findByUserAndRevokedFalse(user)
-                .ifPresent(token -> {
-                    token.setRevoked(true);
-                    refreshTokenRepository.save(token);
-                });
+    public RefreshToken createRefreshToken(User user) {
+        if (user == null || user.getId() == null) {
+            throw new BadRequestException("Cannot create refresh token: user is null or not persisted");
+        }
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
@@ -147,7 +152,8 @@ public class AuthService {
                 .revoked(false)
                 .build();
 
-        return refreshTokenRepository.save(refreshToken);
+        RefreshToken savedToken = refreshTokenRepository.save(refreshToken);
+        return savedToken != null ? savedToken : refreshToken;
     }
 
     @Transactional
@@ -160,23 +166,43 @@ public class AuthService {
         }
 
         User user = token.getUser();
+        if (user == null || user.getId() == null) {
+            throw new BadRequestException("Refresh token is not associated with a valid user");
+        }
+
+        // Revoke the specific token being rotated
+        token.setRevoked(true);
+        refreshTokenRepository.save(token);
+
+        // Issue new rotated token
+        RefreshToken newRefreshToken = RefreshToken.builder()
+                .user(user)
+                .token(UUID.randomUUID().toString())
+                .expiryDate(Instant.now().plusMillis(refreshExpirationMs))
+                .revoked(false)
+                .build();
+        refreshTokenRepository.save(newRefreshToken);
+
         String newAccessToken = jwtService.generateTokenFromUsername(user.getEmail(), user.getId());
 
         return TokenRefreshResponse.builder()
                 .accessToken(newAccessToken)
-                .refreshToken(token.getToken())
+                .refreshToken(newRefreshToken.getToken())
                 .tokenType("Bearer")
                 .build();
     }
 
     @Transactional
     public void logout(Long userId) {
-        userRepository.findById(userId).ifPresent(user -> {
-            refreshTokenRepository.findByUserAndRevokedFalse(user).ifPresent(token -> {
-                token.setRevoked(true);
-                refreshTokenRepository.save(token);
+        if (userId != null) {
+            userRepository.findById(userId).ifPresent(user -> {
+                List<RefreshToken> activeTokens = refreshTokenRepository.findActiveTokensByUser(user);
+                for (RefreshToken t : activeTokens) {
+                    t.setRevoked(true);
+                }
+                refreshTokenRepository.saveAll(activeTokens);
             });
-        });
+        }
     }
 
     public User getCurrentUser() {

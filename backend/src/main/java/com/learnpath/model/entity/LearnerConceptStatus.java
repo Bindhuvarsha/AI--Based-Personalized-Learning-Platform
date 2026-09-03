@@ -32,7 +32,7 @@ public class LearnerConceptStatus {
     @Enumerated(EnumType.STRING)
     @Column(length = 30, nullable = false)
     @Builder.Default
-    private KnowledgeLevel knowledgeLevel = KnowledgeLevel.NOT_STARTED;
+    private KnowledgeLevel knowledgeLevel = KnowledgeLevel.WEAK;
 
     @Builder.Default
     private Double masteryScore = 0.0;

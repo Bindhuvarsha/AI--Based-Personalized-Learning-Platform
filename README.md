@@ -97,31 +97,73 @@ npm run dev
 
 ---
 
-## 🧠 Core Features & Workflows
+---
 
-1. **Adaptive Skill Assessments & Knowledge-Gap Profiling**:
-   - Baseline diagnostics evaluate topic proficiencies as `WEAK`, `DEVELOPING`, `PROFICIENT`, or `ADVANCED`.
-   - Results auto-generate remedial recommendations and unlock prerequisites.
+## 🌟 Advanced AI Features Suite (15 End-to-End Capabilities)
 
-2. **Prerequisite-Aware Roadmaps**:
-   - Visual step-by-step roadmap where topics unlock only when prerequisite topics achieve proficiency.
-   - Recommended next topic badge updates in real time based on test performance.
+LearnPath AI includes 15 interconnected, production-ready AI capabilities spanning frontend, backend, AI microservice, and database:
 
-3. **Multilingual RAG AI Study Tutor**:
-   - Ingest PDF, TXT, or Markdown documents via PyMuPDF.
-   - Chunked semantic indexing and cosine-similarity retrieval.
-   - Grounded answering with exact source excerpt citations and page numbers.
-   - Supports English, Hindi, and Kannada.
+1. **AI Personal Mentor (`/mentor`)**:
+   - 24/7 dedicated coach maintaining conversation context and learning telemetry.
+   - Socratic guidance, daily study advice, weekly progress reviews, and metric citations.
+   - Multilingual interaction in English, Kannada, and Hindi.
 
-4. **Scikit-Learn Recommendation Engine**:
-   - `RandomForestClassifier` predicts learner intervention urgency.
-   - `KMeans` clusters students into learning cohorts (struggling, balanced, accelerator).
+2. **Voice AI Tutor (`/voice-tutor`)**:
+   - Voice question recording via Web Audio MediaRecorder API.
+   - Speech-to-text (STT) transcription and audio response synthesis (TTS).
+   - Grounded explanations with cited knowledge-base references.
 
-5. **Learner Analytics & Recharts Visualization**:
-   - Diagnostic score trajectories over time.
-   - Knowledge level distribution pie charts.
-   - Weak topic alerts with targeted remedial actions.
-   - Consecutive study streak tracker and active learning minutes counter.
+3. **Multilingual Support (English, Kannada, Hindi)**:
+   - Dynamic language switcher in top navigation bar (`Navbar.tsx`).
+   - Seamless translations across UI text, mentor prompts, and tutoring responses.
+
+4. **Image-Based Question Solving (`/image-solver`)**:
+   - Upload photos or screenshots of math equations, coding problems, or diagrams.
+   - OCR text extraction, formula derivations, step-by-step reasoning, and confidence estimation.
+
+5. **Interactive Knowledge Graph (`/knowledge-graph`)**:
+   - Directed Acyclic Graph (DAG) concept dependency network.
+   - Real-time concept status classification: `MASTERED`, `DEVELOPING`, `WEAK`, `LOCKED`, and `RECOMMENDED`.
+   - Cycle prevention validation for concept relations.
+
+6. **Learning Behavior Prediction (`/behavior`)**:
+   - Continuous learner snapshot telemetry tracking assessment trends, drop-off risks, and burnout likelihood.
+   - Explainable ML struggle prediction with targeted pedagogical interventions.
+
+7. **Adaptive Quizzes (`/quiz/adaptive`)**:
+   - Dynamic difficulty calibration (Beginner, Intermediate, Advanced) adjusting after consecutive correct/incorrect answers.
+   - Confidence-rated testing with post-quiz topic mastery recalculation.
+
+8. **Assignment Evaluator & Rubrics (`/assignments`)**:
+   - Multi-criteria rubric evaluation with strengths, weaknesses, and quoted feedback.
+   - Instructor score override and human feedback integration.
+
+9. **AI Coding Tutor & Sandboxed Reviewer (`/coding-tutor`)**:
+   - Interactive coding environment for Java and Python exercises.
+   - Automated execution against test suites, Big-O time/space complexity analysis, syntax error diagnostics, and code diff suggestions.
+
+10. **Gamification Ecosystem (`/gamification`)**:
+    - Idempotent XP transactions, tiered student levels (Novice Explorer to Master Architect), streak tracking, unlockable achievement badges, and global leaderboards.
+
+11. **AI Cohort Study Groups (`/study-groups`)**:
+    - Peer discovery filtered by career goal and focus area.
+    - Cohort discussion boards, shared study goals, and AI-moderated study recommendations.
+
+12. **Intelligent Spaced-Repetition Study Planner (`/study-planner`)**:
+    - Automatic schedule generation matching student availability and target milestones.
+    - Interactive session completion toggle and automated catch-up rescheduling for missed days.
+
+13. **Academic Early Warning System (`/early-warning`)**:
+    - Real-time detection of score drops, inactivity, and struggling concept nodes.
+    - Severity-graded warnings (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`) with one-click action plans and notification center.
+
+14. **AI Career Roadmap Generator (`/career-roadmap`)**:
+    - Career readiness scoring for target tech roles (Backend Java, Full-Stack, AI Engineer).
+    - Step-by-step milestone check-lists and portfolio capstone project recommendations.
+
+15. **Resume Skill-Gap Analyzer (`/resume-analyzer`)**:
+    - Upload resumes in PDF, DOCX, or TXT format with automated skill extraction.
+    - Target job benchmarking with match percentage, 3-column breakdown (Matched, Partial, Missing), and GDPR-compliant data deletion.
 
 ---
 
@@ -131,4 +173,6 @@ npm run dev
 - Passwords salted and hashed with BCrypt.
 - Role-based authorization (`ROLE_STUDENT`, `ROLE_ADMIN`).
 - Zero secret leak policy: all keys managed through `.env` and environment variables.
+- Comprehensive AI audit logging (`AIAuditService`) capturing model version, prompt ID, latency, user ID, and correlation IDs.
 - Deterministic local mock AI fallback ensures full offline capability without requiring third-party API keys.
+
