@@ -32,7 +32,7 @@ public class RecommendationService {
     @Value("${ai-service.url:http://localhost:8000}")
     private String aiServiceUrl;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<RecommendationItemDto> getUserRecommendations(User user) {
         List<Recommendation> recs = recommendationRepository.findByUserIdAndDismissedFalseOrderByPriorityScoreDescCreatedAtDesc(user.getId());
 
@@ -66,8 +66,11 @@ public class RecommendationService {
         }
 
         // Resilient algorithmic baseline recommendation engine:
-        // Clear prior dismissed / stale recommendations
-        recommendationRepository.deleteByUserId(user.getId());
+        // Clear prior dismissed / stale recommendations safely
+        List<Recommendation> existing = recommendationRepository.findByUserIdAndDismissedFalseOrderByPriorityScoreDescCreatedAtDesc(user.getId());
+        if (!existing.isEmpty()) {
+            recommendationRepository.deleteAll(existing);
+        }
 
         List<Recommendation> newRecommendations = new ArrayList<>();
         Map<Long, Progress> progressByTopic = progressList.stream()
@@ -180,7 +183,10 @@ public class RecommendationService {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 List<Map<String, Object>> recs = (List<Map<String, Object>>) response.getBody().get("recommendations");
                 if (recs != null && !recs.isEmpty()) {
-                    recommendationRepository.deleteByUserId(user.getId());
+                    List<Recommendation> existing = recommendationRepository.findByUserIdAndDismissedFalseOrderByPriorityScoreDescCreatedAtDesc(user.getId());
+                    if (!existing.isEmpty()) {
+                        recommendationRepository.deleteAll(existing);
+                    }
                     List<Recommendation> toSave = new ArrayList<>();
                     for (Map<String, Object> r : recs) {
                         toSave.add(Recommendation.builder()

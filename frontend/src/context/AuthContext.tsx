@@ -23,6 +23,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('accessToken'));
   const [loading, setLoading] = useState<boolean>(true);
 
+  const clearAuth = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    setToken(null);
+    setUser(null);
+  };
+
   useEffect(() => {
     const fetchMe = async () => {
       if (token) {
@@ -31,10 +39,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setUser(resp.data);
           localStorage.setItem('user', JSON.stringify(resp.data));
         } catch (err: any) {
-          // Only force logout if the backend explicitly rejected the token with 401
-          // Do not kick user out on network failure or when backend is offline
+          // Only clear local session if backend explicitly rejected token with 401
+          // Do not kick user out on temporary network failure
           if (err.response?.status === 401) {
-            logout();
+            clearAuth();
           }
         }
       }

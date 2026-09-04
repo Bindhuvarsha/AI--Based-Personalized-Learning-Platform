@@ -1,4 +1,4 @@
--- Schema definition and migration for refresh_tokens
+-- Schema definition and migration reference for refresh_tokens
 -- Token itself is strictly unique for session validation.
 -- user_id is a foreign key referencing users(id) with an index to support multiple sessions and atomic token rotation.
 
@@ -13,4 +13,3 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
 );
 
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_refresh_tokens_token ON refresh_tokens(token);

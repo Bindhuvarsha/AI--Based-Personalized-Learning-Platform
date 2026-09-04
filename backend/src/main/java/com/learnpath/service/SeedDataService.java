@@ -83,6 +83,23 @@ public class SeedDataService implements CommandLineRunner {
                         .build()));
         User savedStudent = studentUser;
 
+        // 4. Seed/Verify Student Profile
+        if (profileRepository.findByUserId(savedStudent.getId()).isEmpty()) {
+            StudentProfile profile = StudentProfile.builder()
+                    .user(savedStudent)
+                    .educationLevel("Undergraduate Computer Science")
+                    .subjectsOfInterest("Python, Artificial Intelligence, Web Development, Algorithms")
+                    .currentSkills("Python Basics, Git, HTML/CSS")
+                    .learningGoals("Master Deep Learning architectures, full-stack deployment, and system design")
+                    .preferredDifficulty(DifficultyLevel.INTERMEDIATE)
+                    .preferredLanguage(LanguagePreference.ENGLISH)
+                    .weeklyStudyTargetMinutes(360)
+                    .currentStreakDays(5)
+                    .lastActiveDate(LocalDateTime.now())
+                    .build();
+            profileRepository.save(profile);
+        }
+
         // Skip remaining course/topic seeding if already populated
         if (courseRepository.count() > 0) {
             log.info("Courses and curriculum data already seeded. Seed data ready.");
@@ -91,21 +108,6 @@ public class SeedDataService implements CommandLineRunner {
             log.info("  Student: ID={}, email=student@example.com / Student@123 (Development only)", studentUser.getId());
             return;
         }
-
-        // 4. Seed Student Profile
-        StudentProfile profile = StudentProfile.builder()
-                .user(savedStudent)
-                .educationLevel("Undergraduate Computer Science")
-                .subjectsOfInterest("Python, Artificial Intelligence, Web Development, Algorithms")
-                .currentSkills("Python Basics, Git, HTML/CSS")
-                .learningGoals("Master Deep Learning architectures, full-stack deployment, and system design")
-                .preferredDifficulty(DifficultyLevel.INTERMEDIATE)
-                .preferredLanguage(LanguagePreference.ENGLISH)
-                .weeklyStudyTargetMinutes(360)
-                .currentStreakDays(5)
-                .lastActiveDate(LocalDateTime.now())
-                .build();
-        profileRepository.save(profile);
 
         // 5. Seed Course 1: Python & AI Foundations
         Course pyCourse = Course.builder()
