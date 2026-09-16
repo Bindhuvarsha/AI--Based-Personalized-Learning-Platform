@@ -18,7 +18,7 @@ export const AdminDashboardPage: React.FC = () => {
 
   const fetchCourses = async () => {
     try {
-      const resp = await api.get('/courses');
+      const resp = await api.get('/admin/courses');
       setCourses(resp.data);
     } catch (err) {
       console.error(err);
@@ -35,7 +35,7 @@ export const AdminDashboardPage: React.FC = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await api.post('/courses', {
+      await api.post('/admin/courses', {
         title,
         description,
         category,
@@ -57,7 +57,7 @@ export const AdminDashboardPage: React.FC = () => {
   const handleDeleteCourse = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this course?')) return;
     try {
-      await api.delete(`/courses/${id}`);
+      await api.delete(`/admin/courses/${id}`);
       showToast('Course deleted', 'success');
       fetchCourses();
     } catch (err) {
@@ -67,7 +67,13 @@ export const AdminDashboardPage: React.FC = () => {
 
   const handleTogglePublish = async (course: Course) => {
     try {
-      await api.post(`/courses/${course.id}/publish`);
+      await api.put(`/admin/courses/${course.id}`, {
+        title: course.title,
+        description: course.description,
+        category: course.category,
+        difficulty: course.difficulty,
+        published: !course.published,
+      });
       showToast(`Course ${course.published ? 'unpublished' : 'published'}!`, 'success');
       fetchCourses();
     } catch (err) {

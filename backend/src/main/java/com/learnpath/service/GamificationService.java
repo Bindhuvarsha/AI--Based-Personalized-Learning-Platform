@@ -64,7 +64,7 @@ public class GamificationService {
                         .badgeType(b.getBadgeType().name())
                         .xpBonus(b.getXpBonus())
                         .isUnlocked(earnedIds.contains(b.getId()))
-                        .unlockedAt(earnedIds.contains(b.getId()) ? LocalDateTime.now().minusDays(2) : null)
+                        .unlockedAt(earnedIds.contains(b.getId()) ? LocalDateTime.now().minusDays(1) : null)
                         .build())
                 .collect(Collectors.toList());
 

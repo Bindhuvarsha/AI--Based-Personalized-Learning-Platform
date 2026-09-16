@@ -61,8 +61,8 @@ public class RoadmapService {
         for (Topic t : topics) {
             List<Long> prereqIds = parsePrerequisites(t.getPrerequisites());
 
-            // Topic is unlocked if it has no prerequisites, or if ALL prerequisites are satisfied
-            boolean isUnlocked = prereqIds.isEmpty() || completedTopicIds.containsAll(prereqIds);
+            // All topics are unlocked for full exploratory and learning access
+            boolean isUnlocked = true;
 
             Progress p = progressMap.get(t.getId());
             ProgressStatus status = p != null ? p.getStatus() : ProgressStatus.NOT_STARTED;

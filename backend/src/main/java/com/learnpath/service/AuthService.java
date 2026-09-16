@@ -44,7 +44,7 @@ public class AuthService {
     private final JwtService jwtService;
 
     @Value("${app.jwt.refresh-expiration-ms:604800000}")
-    private Long refreshExpirationMs;
+    private Long refreshExpirationMs = 604800000L;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -56,11 +56,15 @@ public class AuthService {
         if ("ADMIN".equalsIgnoreCase(request.getRole())) {
             Role adminRole = roleRepository.findByName(RoleType.ROLE_ADMIN)
                     .orElseGet(() -> roleRepository.save(Role.builder().name(RoleType.ROLE_ADMIN).build()));
-            roles.add(adminRole);
+            if (adminRole != null) {
+                roles.add(adminRole);
+            }
         } else {
             Role studentRole = roleRepository.findByName(RoleType.ROLE_STUDENT)
                     .orElseGet(() -> roleRepository.save(Role.builder().name(RoleType.ROLE_STUDENT).build()));
-            roles.add(studentRole);
+            if (studentRole != null) {
+                roles.add(studentRole);
+            }
         }
 
         User user = User.builder()
@@ -74,7 +78,9 @@ public class AuthService {
         User savedUser = userRepository.save(user);
 
         // Auto-create initial profile for students
-        boolean isStudent = roles.stream().anyMatch(r -> r.getName() == RoleType.ROLE_STUDENT);
+        boolean isStudent = roles.stream()
+                .filter(Objects::nonNull)
+                .anyMatch(r -> r.getName() == RoleType.ROLE_STUDENT);
         if (isStudent) {
             StudentProfile profile = StudentProfile.builder()
                     .user(savedUser)
@@ -145,10 +151,11 @@ public class AuthService {
             throw new BadRequestException("Cannot create refresh token: user is null or not persisted");
         }
 
+        long expiryMs = refreshExpirationMs != null ? refreshExpirationMs : 604800000L;
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
                 .token(UUID.randomUUID().toString())
-                .expiryDate(Instant.now().plusMillis(refreshExpirationMs))
+                .expiryDate(Instant.now().plusMillis(expiryMs))
                 .revoked(false)
                 .build();
 

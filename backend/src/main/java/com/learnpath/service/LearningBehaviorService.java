@@ -40,13 +40,24 @@ public class LearningBehaviorService {
         List<QuizAttempt> attempts = quizAttemptRepository.findByUserIdOrderByCompletedAtDesc(user.getId());
         List<Progress> progresses = progressRepository.findByUserId(user.getId());
 
-        double avgScore = attempts.isEmpty() ? 75.0 : attempts.stream().mapToDouble(QuizAttempt::getPercentage).average().orElse(75.0);
+        double avgScore = attempts.isEmpty() ? 75.0 : attempts.stream()
+                .mapToDouble(a -> {
+                    if (a.getPercentage() != null) return a.getPercentage();
+                    if (a.getTotalQuestions() != null && a.getTotalQuestions() > 0 && a.getScore() != null) {
+                        return ((double) a.getScore() / a.getTotalQuestions()) * 100.0;
+                    }
+                    return 75.0;
+                })
+                .average()
+                .orElse(75.0);
         int failedAttempts = (int) attempts.stream().filter(a -> !a.isPassed()).count();
 
         // Calculate score trend slope (latest attempt - oldest recent attempt)
         double scoreTrend = 0.0;
         if (attempts.size() >= 2) {
-            scoreTrend = attempts.get(0).getPercentage() - attempts.get(attempts.size() - 1).getPercentage();
+            double first = attempts.get(0).getPercentage() != null ? attempts.get(0).getPercentage() : 0.0;
+            double last = attempts.get(attempts.size() - 1).getPercentage() != null ? attempts.get(attempts.size() - 1).getPercentage() : 0.0;
+            scoreTrend = first - last;
         }
 
         int inactivityDays = attempts.isEmpty() ? 2 : 1;

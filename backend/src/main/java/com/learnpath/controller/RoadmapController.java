@@ -25,4 +25,11 @@ public class RoadmapController {
         User currentUser = authService.getCurrentUser();
         return ResponseEntity.ok(roadmapService.getPersonalizedRoadmap(courseId, currentUser));
     }
+
+    @GetMapping("/courses/{courseId}")
+    @Operation(summary = "Get personalized learning roadmap by course ID")
+    public ResponseEntity<RoadmapResponse> getRoadmapByCourse(@PathVariable Long courseId) {
+        User currentUser = authService.getCurrentUser();
+        return ResponseEntity.ok(roadmapService.getPersonalizedRoadmap(courseId, currentUser));
+    }
 }

@@ -61,6 +61,10 @@ uploads/
 *.sublime-workspace
 .DS_Store
 Thumbs.db
+bin/
+.settings/
+.classpath
+.project
 
 # Database files
 postgres_data/

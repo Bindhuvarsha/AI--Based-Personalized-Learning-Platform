@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { mentorApi } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { mentorApi, api } from '../services/api';
 import { MentorProfile, MentorChatResponse, DailyAdviceResponse, WeeklyReviewResponse, MentorRecommendationItem } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../context/ToastContext';
@@ -19,6 +20,7 @@ interface ChatMessage {
 }
 
 export const MentorPage: React.FC = () => {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const { language, t } = useLanguage();
 
@@ -30,12 +32,97 @@ export const MentorPage: React.FC = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [showWeeklyModal, setShowWeeklyModal] = useState(false);
+  const [topics, setTopics] = useState<{ id: number; title: string }[]>([]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadMentorData();
+    const fetchTopics = async () => {
+      try {
+        const resp = await api.get('/courses');
+        const allTopics: { id: number; title: string }[] = [];
+        for (const c of resp.data) {
+          if (c.topics) {
+            c.topics.forEach((topic: any) => allTopics.push({ id: topic.id, title: topic.title }));
+          }
+        }
+        if (allTopics.length > 0) {
+          setTopics(allTopics);
+        }
+      } catch (e) {
+        // silent fallback
+      }
+    };
+    fetchTopics();
   }, []);
+
+  const handleStartRecommendation = (rec: MentorRecommendationItem) => {
+    if (rec.actionPayload) {
+      if (rec.actionPayload.startsWith('/')) {
+        navigate(rec.actionPayload);
+        return;
+      }
+      if (!isNaN(Number(rec.actionPayload))) {
+        navigate(`/quiz/${rec.actionPayload}`);
+        return;
+      }
+    }
+
+    const titleClean = (rec.title || '')
+      .replace(/^review fundamentals:\s*/i, '')
+      .replace(/\s*\(\d+(\.\d+)?%\)$/, '')
+      .trim()
+      .toLowerCase();
+
+    // Match dynamically against known topics from courses
+    const matched = topics.find(t =>
+      t.title.toLowerCase().includes(titleClean) || titleClean.includes(t.title.toLowerCase())
+    );
+
+    if (matched) {
+      navigate(`/quiz/${matched.id}`);
+      return;
+    }
+
+    // Seed data fallback IDs
+    if (titleClean.includes('python') || titleClean.includes('syntax') || titleClean.includes('data structure')) {
+      navigate('/quiz/1');
+      return;
+    } else if (titleClean.includes('numpy') || titleClean.includes('vector')) {
+      navigate('/quiz/2');
+      return;
+    } else if (titleClean.includes('pandas')) {
+      navigate('/quiz/3');
+      return;
+    } else if (titleClean.includes('scikit') || titleClean.includes('machine learning')) {
+      navigate('/quiz/4');
+      return;
+    } else if (titleClean.includes('neural') || titleClean.includes('deep learning')) {
+      navigate('/quiz/5');
+      return;
+    } else if (titleClean.includes('rest') || titleClean.includes('spring boot')) {
+      navigate('/quiz/6');
+      return;
+    } else if (titleClean.includes('jwt') || titleClean.includes('security')) {
+      navigate('/quiz/7');
+      return;
+    } else if (titleClean.includes('react') || titleClean.includes('hook')) {
+      navigate('/quiz/8');
+      return;
+    }
+
+    const actionLower = (rec.actionType || '').toLowerCase();
+    if (actionLower.includes('quiz')) {
+      navigate('/quiz/adaptive');
+    } else if (actionLower.includes('code')) {
+      navigate('/coding-tutor');
+    } else if (actionLower.includes('career')) {
+      navigate('/career-roadmap');
+    } else {
+      navigate('/roadmap');
+    }
+  };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -266,9 +353,13 @@ export const MentorPage: React.FC = () => {
                             <p className="font-bold text-slate-900">{rec.title}</p>
                             <p className="text-[11px] text-slate-500">{rec.reason}</p>
                           </div>
-                          <span className="inline-flex items-center text-brand-600 font-bold hover:underline cursor-pointer ml-2 flex-shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleStartRecommendation(rec)}
+                            className="inline-flex items-center text-brand-600 hover:text-brand-700 font-bold hover:underline cursor-pointer ml-2 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-brand-500 rounded px-1.5 py-0.5 transition-colors"
+                          >
                             Start <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
-                          </span>
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -338,7 +429,11 @@ export const MentorPage: React.FC = () => {
                     <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">{rec.reason}</p>
                     <div className="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
                       <span className="text-slate-400 font-mono text-[10px]">{rec.actionType}</span>
-                      <button className="font-bold text-brand-600 hover:text-brand-700 flex items-center">
+                      <button
+                        type="button"
+                        onClick={() => handleStartRecommendation(rec)}
+                        className="font-bold text-brand-600 hover:text-brand-700 flex items-center hover:underline focus:outline-none focus:ring-2 focus:ring-brand-500 rounded px-1 transition-colors"
+                      >
                         Launch <ChevronRight className="w-3 h-3 ml-0.5" />
                       </button>
                     </div>

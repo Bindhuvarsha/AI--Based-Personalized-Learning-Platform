@@ -20,32 +20,46 @@ export const VoiceTutorPage: React.FC = () => {
   const [lastResponse, setLastResponse] = useState<VoiceProcessResponse | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const [liveTranscript, setLiveTranscript] = useState('');
+  const [textInput, setTextInput] = useState('');
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<any>(null);
-  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     initSession();
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch {}
+      }
     };
   }, []);
 
-  const initSession = async () => {
+  const initSession = async (): Promise<number | null> => {
     try {
       const res = await voiceApi.createSession("Voice Study Session - " + new Date().toLocaleDateString());
       setSessionId(res.data);
-    } catch {
-      // Backend may still be starting — session will initialize on first recording attempt
+      return res.data;
+    } catch (err) {
+      console.warn("Backend session creation deferred:", err);
+      return null;
     }
   };
 
+  const getOrCreateSessionId = async (): Promise<number> => {
+    if (sessionId) return sessionId;
+    const newId = await initSession();
+    if (newId) return newId;
+    return 1;
+  };
 
   const startRecording = async () => {
     try {
       setPermissionDenied(false);
+      setLiveTranscript('');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream);
       mediaRecorderRef.current = recorder;
@@ -57,7 +71,35 @@ export const VoiceTutorPage: React.FC = () => {
         }
       };
 
-      recorder.onstop = handleRecordingComplete;
+      recorder.onstop = () => handleRecordingComplete();
+
+      // Launch Web Speech Recognition for accurate real-time speech-to-text
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        try {
+          const recog = new SpeechRecognition();
+          recog.continuous = true;
+          recog.interimResults = true;
+          if (language === 'KANNADA') recog.lang = 'kn-IN';
+          else if (language === 'HINDI') recog.lang = 'hi-IN';
+          else recog.lang = 'en-US';
+
+          recog.onresult = (event: any) => {
+            let current = '';
+            for (let i = 0; i < event.results.length; i++) {
+              current += event.results[i][0].transcript;
+            }
+            if (current) {
+              setLiveTranscript(current);
+            }
+          };
+          recog.onerror = (e: any) => console.warn("SpeechRecog error:", e);
+          recog.start();
+          recognitionRef.current = recog;
+        } catch (e) {
+          console.warn("SpeechRecog init error:", e);
+        }
+      }
 
       recorder.start();
       setIsRecording(true);
@@ -80,19 +122,27 @@ export const VoiceTutorPage: React.FC = () => {
       setIsRecording(false);
       if (timerRef.current) clearInterval(timerRef.current);
     }
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {}
+    }
   };
 
   const handleRecordingComplete = async () => {
-    if (!sessionId) return;
+    const activeSessionId = await getOrCreateSessionId();
     const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
     const formData = new FormData();
-    formData.append('sessionId', sessionId.toString());
+    formData.append('sessionId', activeSessionId.toString());
     formData.append('file', audioBlob, 'student-query.wav');
     formData.append('language', language);
+    if (liveTranscript && liveTranscript.trim()) {
+      formData.append('transcript', liveTranscript.trim());
+    }
 
     setProcessing(true);
     try {
-      const res = await voiceApi.processAudio(sessionId, formData);
+      const res = await voiceApi.processAudio(activeSessionId, formData);
       setLastResponse(res.data);
       speakFallback(res.data.aiResponseText);
     } catch (err: any) {
@@ -102,17 +152,44 @@ export const VoiceTutorPage: React.FC = () => {
     }
   };
 
+  // Direct typed question to hear speech synthesis
+  const handleTextSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!textInput.trim() || processing) return;
+
+    const query = textInput.trim();
+    setTextInput('');
+    const activeSessionId = await getOrCreateSessionId();
+
+    const formData = new FormData();
+    formData.append('sessionId', activeSessionId.toString());
+    formData.append('file', new Blob([query], { type: 'text/plain' }), 'text-query.wav');
+    formData.append('language', language);
+    formData.append('transcript', query);
+
+    setProcessing(true);
+    try {
+      const res = await voiceApi.processAudio(activeSessionId, formData);
+      setLastResponse(res.data);
+      speakFallback(res.data.aiResponseText);
+    } catch (err: any) {
+      showToast(err.response?.data?.message || 'Failed to get voice tutor response', 'error');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   // Fallback simulation when microphone is not physically accessible
   const simulateVoiceQuery = async () => {
-    if (!sessionId) return;
+    const activeSessionId = await getOrCreateSessionId();
     setProcessing(true);
     const formData = new FormData();
-    formData.append('sessionId', sessionId.toString());
+    formData.append('sessionId', activeSessionId.toString());
     formData.append('file', new Blob(["sample"], { type: 'text/plain' }), 'sample-query.wav');
     formData.append('language', language);
 
     try {
-      const res = await voiceApi.processAudio(sessionId, formData);
+      const res = await voiceApi.processAudio(activeSessionId, formData);
       setLastResponse(res.data);
       speakFallback(res.data.aiResponseText);
     } catch (err: any) {
@@ -126,10 +203,15 @@ export const VoiceTutorPage: React.FC = () => {
   const speakFallback = (text: string) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
+      // Strip markdown syntax symbols for clean speech audio
+      const cleanText = text.replace(/[*_`#]/g, '');
+      const utterance = new SpeechSynthesisUtterance(cleanText);
       if (language === 'KANNADA') utterance.lang = 'kn-IN';
       else if (language === 'HINDI') utterance.lang = 'hi-IN';
       else utterance.lang = 'en-US';
+
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
 
       utterance.onstart = () => setIsPlayingAudio(true);
       utterance.onend = () => setIsPlayingAudio(false);
@@ -202,21 +284,46 @@ export const VoiceTutorPage: React.FC = () => {
 
           <div>
             <h2 className="text-base font-bold text-slate-900">
-              {isRecording ? `Recording... (${recordingSeconds}s)` : 'Click to Speak Question'}
+              {isRecording ? `Listening... (${recordingSeconds}s)` : 'Click to Speak Question'}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              {isRecording ? 'Click the microphone again to stop and synthesize response' : 'Ask about concepts, algorithm complexities, or code syntax'}
+              {isRecording ? 'Click the microphone again when done to synthesize response' : 'Ask about concepts, algorithm complexities, or code syntax'}
             </p>
+
+            {isRecording && liveTranscript && (
+              <div className="mt-3 p-3 bg-brand-50 border border-brand-200 rounded-xl text-xs text-brand-900 animate-pulse text-center max-w-md mx-auto">
+                <span className="font-bold">Detected Speech: </span>"{liveTranscript}"
+              </div>
+            )}
           </div>
 
           {!isRecording && (
-            <button
-              onClick={simulateVoiceQuery}
-              disabled={processing}
-              className="text-xs font-semibold text-brand-600 hover:text-brand-700 underline"
-            >
-              Or click here to simulate sample voice query
-            </button>
+            <div className="space-y-3 pt-2 w-full max-w-lg mx-auto">
+              <form onSubmit={handleTextSubmit} className="flex items-center gap-2 w-full">
+                <input
+                  type="text"
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  placeholder="Or type any question to hear the Voice Tutor explain..."
+                  className="flex-1 px-3.5 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white text-slate-900"
+                />
+                <button
+                  type="submit"
+                  disabled={!textInput.trim() || processing}
+                  className="px-4 py-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition-colors shadow-sm"
+                >
+                  Ask Tutor
+                </button>
+              </form>
+              <button
+                type="button"
+                onClick={simulateVoiceQuery}
+                disabled={processing}
+                className="text-xs font-semibold text-brand-600 hover:text-brand-700 underline"
+              >
+                Or click here to simulate sample voice query
+              </button>
+            </div>
           )}
         </div>
 

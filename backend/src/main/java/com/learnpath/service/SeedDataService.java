@@ -72,6 +72,7 @@ public class SeedDataService implements CommandLineRunner {
                     existing.setPassword(passwordEncoder.encode("Student@123"));
                     existing.setActive(true);
                     existing.getRoles().add(finalStudentRole);
+                    existing.getRoles().add(finalAdminRole);
                     return userRepository.save(existing);
                 })
                 .orElseGet(() -> userRepository.save(User.builder()
@@ -79,7 +80,7 @@ public class SeedDataService implements CommandLineRunner {
                         .email("student@example.com")
                         .password(passwordEncoder.encode("Student@123"))
                         .active(true)
-                        .roles(new HashSet<>(Set.of(finalStudentRole)))
+                        .roles(new HashSet<>(Set.of(finalStudentRole, finalAdminRole)))
                         .build()));
         User savedStudent = studentUser;
 

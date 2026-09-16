@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { RoadmapResponse, RoadmapNode, Course } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { KnowledgeBadge, StatusBadge } from '../components/Badge';
-import { Target, Lock, CheckCircle2, ChevronRight, Brain, BookOpen, Sparkles, RefreshCw } from 'lucide-react';
+import { Target, Lock, CheckCircle2, ChevronRight, Brain, BookOpen, Sparkles, RefreshCw, AlertCircle } from 'lucide-react';
 
 export const RoadmapPage: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -12,6 +12,27 @@ export const RoadmapPage: React.FC = () => {
   const [roadmap, setRoadmap] = useState<RoadmapResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchRoadmap = useCallback(async (courseId: number) => {
+    setRefreshing(true);
+    setError(null);
+    try {
+      let resp;
+      try {
+        resp = await api.get(`/roadmap/courses/${courseId}`);
+      } catch {
+        resp = await api.get('/roadmap', { params: { courseId } });
+      }
+      setRoadmap(resp.data);
+    } catch (err: any) {
+      console.error('Failed to load roadmap', err);
+      setError(err?.response?.data?.message || 'Failed to load roadmap. Please ensure the backend service is running.');
+      setRoadmap(null);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -31,20 +52,10 @@ export const RoadmapPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedCourseId) return;
-    const fetchRoadmap = async () => {
-      setRefreshing(true);
-      try {
-        const resp = await api.get(`/roadmap/courses/${selectedCourseId}`);
-        setRoadmap(resp.data);
-      } catch (err) {
-        console.error('Failed to load roadmap', err);
-      } finally {
-        setRefreshing(false);
-      }
-    };
-    fetchRoadmap();
-  }, [selectedCourseId]);
+    if (selectedCourseId) {
+      fetchRoadmap(selectedCourseId);
+    }
+  }, [selectedCourseId, fetchRoadmap]);
 
   if (loading) return <LoadingSpinner message="Loading learning roadmaps..." />;
 
@@ -110,7 +121,7 @@ export const RoadmapPage: React.FC = () => {
         <div className="relative pl-6 sm:pl-8 border-l-2 border-slate-200 ml-4 sm:ml-6 space-y-6 py-2">
           {roadmap.nodes.map((node: RoadmapNode, index: number) => {
             const isCompleted = node.status === 'COMPLETED';
-            const isLocked = !node.isUnlocked;
+            const isLocked = false; // Full access enabled: all roadmap nodes unlocked
             const isNext = node.recommendedNext;
 
             return (
@@ -186,6 +197,19 @@ export const RoadmapPage: React.FC = () => {
               </div>
             );
           })}
+        </div>
+      ) : error ? (
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-8 text-center space-y-3">
+          <AlertCircle className="w-10 h-10 text-rose-500 mx-auto" />
+          <p className="text-sm font-semibold text-rose-800">{error}</p>
+          <button
+            type="button"
+            onClick={() => selectedCourseId && fetchRoadmap(selectedCourseId)}
+            className="inline-flex items-center space-x-1.5 px-4 py-2 bg-rose-600 text-white text-xs font-semibold rounded-xl hover:bg-rose-700 transition"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Retry Loading</span>
+          </button>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center">

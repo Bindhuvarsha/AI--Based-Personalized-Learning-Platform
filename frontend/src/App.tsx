@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { MobileNavProvider } from './context/MobileNavContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { DashboardLayout } from './components/DashboardLayout';
 
@@ -46,7 +47,8 @@ export const App: React.FC = () => {
       <LanguageProvider>
         <ToastProvider>
           <AuthProvider>
-            <Routes>
+            <MobileNavProvider>
+              <Routes>
               {/* Public Routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
@@ -101,8 +103,9 @@ export const App: React.FC = () => {
               {/* Fallback */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </AuthProvider>
-        </ToastProvider>
+          </MobileNavProvider>
+        </AuthProvider>
+      </ToastProvider>
       </LanguageProvider>
     </BrowserRouter>
   );

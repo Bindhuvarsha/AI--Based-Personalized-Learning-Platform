@@ -32,7 +32,7 @@ public class AssignmentFeatureController {
     }
 
     @PutMapping("/submissions/{submissionId}/override")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STUDENT')")
     public ResponseEntity<EvaluationResultDto> teacherOverride(
             @AuthenticationPrincipal User teacher,
             @PathVariable Long submissionId,

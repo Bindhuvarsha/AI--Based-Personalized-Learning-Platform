@@ -74,10 +74,13 @@ public class MentorService {
         List<Progress> progresses = progressRepository.findByUserId(user.getId());
         List<QuizAttempt> recentAttempts = quizAttemptRepository.findByUserIdOrderByCompletedAtDesc(user.getId());
 
-        List<String> weakTopics = progresses.stream()
+        List<Progress> weakProgresses = progresses.stream()
                 .filter(p -> p.getMasteryScore() < 60.0)
-                .map(p -> p.getTopic().getTitle() + " (" + p.getMasteryScore() + "%)")
                 .limit(3)
+                .collect(Collectors.toList());
+
+        List<String> weakTopics = weakProgresses.stream()
+                .map(p -> p.getTopic().getTitle() + " (" + p.getMasteryScore() + "%)")
                 .collect(Collectors.toList());
 
         List<String> evidence = new ArrayList<>();
@@ -113,11 +116,17 @@ public class MentorService {
         }
 
         // Generate persistent recommendation
+        Long targetTopicId = !weakProgresses.isEmpty() && weakProgresses.get(0).getTopic() != null
+                ? weakProgresses.get(0).getTopic().getId()
+                : null;
+        String actionPayload = targetTopicId != null ? "/quiz/" + targetTopicId : "/roadmap";
+
         MentorRecommendation rec = MentorRecommendation.builder()
                 .mentorProfile(profile)
                 .title(weakTopics.isEmpty() ? "Explore Advanced Spring Security & JWT" : "Review Fundamentals: " + weakTopics.get(0))
                 .reason(weakTopics.isEmpty() ? "Continuous progression toward career readiness" : "Recent score was below 60%")
-                .actionType("STUDY_TOPIC")
+                .actionType(targetTopicId != null ? "STUDY_TOPIC" : "ADAPTIVE_QUIZ")
+                .actionPayload(actionPayload)
                 .priority(1)
                 .build();
         MentorRecommendation savedRec = mentorRecommendationRepository.save(rec);
@@ -140,6 +149,7 @@ public class MentorService {
                 .title(savedRec.getTitle())
                 .reason(savedRec.getReason())
                 .actionType(savedRec.getActionType())
+                .actionPayload(savedRec.getActionPayload())
                 .priority(savedRec.getPriority())
                 .isActioned(savedRec.getIsActioned())
                 .build();
@@ -178,6 +188,7 @@ public class MentorService {
                         .title(r.getTitle())
                         .reason(r.getReason())
                         .actionType(r.getActionType())
+                        .actionPayload(r.getActionPayload())
                         .priority(r.getPriority())
                         .isActioned(r.getIsActioned())
                         .build())

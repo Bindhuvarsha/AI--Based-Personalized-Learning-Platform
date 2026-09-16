@@ -125,7 +125,7 @@ class KnowledgeGraphServiceTest {
 
     @Test
     void testValidateNoCycles_NoCycle() {
-        when(conceptRelationRepository.findAll()).thenReturn(List.of(relation));
+        when(conceptRelationRepository.findBySourceConceptId(3L)).thenReturn(List.of());
 
         // Adding c2 -> c3 shouldn't create a cycle
         boolean valid = knowledgeGraphService.validateNoCycles(2L, 3L);

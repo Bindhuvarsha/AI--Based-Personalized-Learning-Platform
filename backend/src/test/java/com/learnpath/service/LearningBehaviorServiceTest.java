@@ -55,6 +55,7 @@ class LearningBehaviorServiceTest {
                 .user(testUser)
                 .score(90)
                 .totalQuestions(10)
+                .percentage(90.0)
                 .passed(true)
                 .completedAt(LocalDateTime.now())
                 .build();

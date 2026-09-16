@@ -1,8 +1,5 @@
 {
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  "framework": "vite",
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/dist"
 }

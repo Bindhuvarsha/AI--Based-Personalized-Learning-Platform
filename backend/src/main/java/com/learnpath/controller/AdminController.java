@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'STUDENT')")
 @Tag(name = "Admin Management", description = "Endpoints for administrators to manage courses, topics, and study materials")
 public class AdminController {
 

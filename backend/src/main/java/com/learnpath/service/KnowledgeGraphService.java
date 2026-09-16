@@ -44,22 +44,18 @@ public class KnowledgeGraphService {
         for (Concept c : allConcepts) {
             LearnerConceptStatus status = statusMap.get(c.getId());
             double mastery = status != null ? status.getMasteryScore() : 0.0;
-            String nodeStatus = "LOCKED";
+            String nodeStatus = "RECOMMENDED";
 
-            if (status != null && status.getUnlocked()) {
-                if (mastery >= 80.0) {
-                    nodeStatus = "MASTERED";
-                    mastered++;
-                } else if (mastery >= 50.0) {
-                    nodeStatus = "DEVELOPING";
-                    developing++;
-                } else if (mastery > 0.0) {
-                    nodeStatus = "WEAK";
-                    weak++;
-                } else {
-                    nodeStatus = "RECOMMENDED";
-                }
-            } else if (statusMap.isEmpty() || c.getIncomingRelations().isEmpty()) {
+            if (mastery >= 80.0) {
+                nodeStatus = "MASTERED";
+                mastered++;
+            } else if (mastery >= 50.0) {
+                nodeStatus = "DEVELOPING";
+                developing++;
+            } else if (mastery > 0.0) {
+                nodeStatus = "WEAK";
+                weak++;
+            } else {
                 nodeStatus = "RECOMMENDED";
             }
 
