@@ -74,6 +74,24 @@ class OpenAIProvider(AIProviderInterface):
         from app.ai.mock_provider import DeterministicMockAIProvider
         return DeterministicMockAIProvider().generate_quiz_questions(topic, difficulty, count)
 
+    def summarize_content(
+        self,
+        text: str,
+        document_title: str = "Study Notes",
+        language: str = "english"
+    ) -> Dict[str, Any]:
+        from app.ai.mock_provider import DeterministicMockAIProvider
+        return DeterministicMockAIProvider().summarize_content(text, document_title, language)
+
+    def generate_quiz_from_content(
+        self,
+        text: str,
+        count: int = 5,
+        difficulty: str = "INTERMEDIATE"
+    ) -> List[Dict[str, Any]]:
+        from app.ai.mock_provider import DeterministicMockAIProvider
+        return DeterministicMockAIProvider().generate_quiz_from_content(text, count, difficulty)
+
 def get_ai_provider() -> AIProviderInterface:
     if settings.AI_PROVIDER.lower() == "openai" and settings.OPENAI_API_KEY:
         return OpenAIProvider()

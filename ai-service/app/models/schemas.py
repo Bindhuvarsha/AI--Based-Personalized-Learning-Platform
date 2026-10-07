@@ -68,3 +68,31 @@ class GenerateQuestionsResponse(BaseModel):
     topic: str
     difficulty: str
     questions: List[GeneratedQuestion]
+
+class FlashcardItem(BaseModel):
+    term: str
+    definition: str
+
+class SummarizeDocumentRequest(BaseModel):
+    text: Optional[str] = None
+    documentTitle: Optional[str] = "Study Notes"
+    language: str = "english"
+
+class SummarizeDocumentResponse(BaseModel):
+    documentTitle: str
+    executiveSummary: str
+    keyTakeaways: List[str]
+    flashcards: List[FlashcardItem]
+    estimatedReadTimeMinutes: int
+    totalWords: int
+
+class QuizFromDocumentRequest(BaseModel):
+    text: Optional[str] = None
+    documentTitle: Optional[str] = "Study Notes"
+    count: int = 5
+    difficulty: str = "INTERMEDIATE"
+
+class QuizFromDocumentResponse(BaseModel):
+    documentTitle: str
+    difficulty: str
+    questions: List[GeneratedQuestion]

@@ -82,6 +82,12 @@ export const behaviorApi = {
   predict: () => api.get('/behavior/predict'),
 };
 
+export const courseApi = {
+  getAll: () => api.get('/courses'),
+  getById: (id: number) => api.get(`/courses/${id}`),
+  getTopicDetails: (topicId: number) => api.get(`/courses/topics/${topicId}`),
+};
+
 export const adaptiveQuizApi = {
   startSession: (topicId: number) => api.post(`/quiz/adaptive/start/${topicId}`),
   submitAnswer: (data: { sessionId: number; questionId: number; selectedOptionIndex: number; timeSpentSeconds: number; confidenceScore: number }) =>
@@ -144,4 +150,28 @@ export const resumeApi = {
   analyze: (documentId: number, targetRole?: string) =>
     api.post('/resume/analyze', null, { params: { documentId, targetRole } }),
   deleteResume: (id: number) => api.delete(`/resume/${id}`),
+};
+
+export const documentAiApi = {
+  summarizeText: (text: string, documentTitle?: string, language?: string) =>
+    api.post('/document-ai/summarize-text', { text, documentTitle, language }),
+  summarizeFile: (formData: FormData) =>
+    api.post('/document-ai/summarize-file', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  quizFromText: (text: string, documentTitle?: string, count: number = 5, difficulty: string = 'INTERMEDIATE') =>
+    api.post('/document-ai/quiz-from-text', { text, documentTitle, count, difficulty }),
+  quizFromFile: (formData: FormData) =>
+    api.post('/document-ai/quiz-from-file', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+};
+
+export const certificateApi = {
+  getMyCertificates: () => api.get('/certificates/my-certificates'),
+  claim: (data: { courseTitle: string; score?: number; skills?: string[] }) =>
+    api.post('/certificates/claim', data),
+  verify: (certificateId: string) => api.get(`/certificates/verify/${certificateId}`),
+};
+
+export const teacherApi = {
+  getCohortAnalytics: () => api.get('/teacher/cohort-analytics'),
+  sendIntervention: (data: { studentId: number; message: string; recommendedTopicId?: number }) =>
+    api.post('/teacher/intervene', data),
 };

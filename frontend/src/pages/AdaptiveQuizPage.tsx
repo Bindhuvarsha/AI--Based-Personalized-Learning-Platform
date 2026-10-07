@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { adaptiveQuizApi } from '../services/api';
-import { AdaptiveSessionStart, AdaptiveSubmitResponse, Question } from '../types';
+import React, { useState, useEffect } from 'react';
+import { adaptiveQuizApi, courseApi } from '../services/api';
+import { AdaptiveSessionStart, AdaptiveSubmitResponse, Question, Course } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../context/ToastContext';
 import {
@@ -12,7 +12,9 @@ import { Link } from 'react-router-dom';
 export const AdaptiveQuizPage: React.FC = () => {
   const { showToast } = useToast();
 
+  const [topics, setTopics] = useState<{ id: number; title: string; courseTitle: string }[]>([]);
   const [topicId, setTopicId] = useState<number>(1);
+  const [loadingTopics, setLoadingTopics] = useState<boolean>(true);
   const [session, setSession] = useState<AdaptiveSessionStart | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -21,6 +23,37 @@ export const AdaptiveQuizPage: React.FC = () => {
   const [lastResult, setLastResult] = useState<AdaptiveSubmitResponse | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [starting, setStarting] = useState(false);
+
+  useEffect(() => {
+    const fetchTopics = async () => {
+      setLoadingTopics(true);
+      try {
+        const res = await courseApi.getAll();
+        const courses: Course[] = res.data || [];
+        const flatTopics: { id: number; title: string; courseTitle: string }[] = [];
+        courses.forEach((c) => {
+          if (c.topics && c.topics.length > 0) {
+            c.topics.forEach((t) => {
+              flatTopics.push({
+                id: t.id,
+                title: t.title,
+                courseTitle: c.title,
+              });
+            });
+          }
+        });
+        setTopics(flatTopics);
+        if (flatTopics.length > 0) {
+          setTopicId(flatTopics[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to load curriculum topics:', err);
+      } finally {
+        setLoadingTopics(false);
+      }
+    };
+    fetchTopics();
+  }, []);
 
   const startQuiz = async (selectedTopicId: number = topicId) => {
     setStarting(true);
@@ -32,7 +65,8 @@ export const AdaptiveQuizPage: React.FC = () => {
       setSession(res.data);
       setCurrentQuestion(res.data.firstQuestion);
     } catch (err: any) {
-      showToast('Failed to start adaptive session', 'error');
+      const msg = err.response?.data?.message || (typeof err.response?.data === 'string' ? err.response?.data : null) || 'Failed to start adaptive session';
+      showToast(msg, 'error');
     } finally {
       setStarting(false);
     }
@@ -113,25 +147,36 @@ export const AdaptiveQuizPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="max-w-xs mx-auto space-y-3">
-            <select
-              value={topicId}
-              onChange={(e) => setTopicId(Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
-            >
-              <option value={1}>Java 21 Fundamentals & OOP</option>
-              <option value={2}>Data Structures & Algorithms</option>
-              <option value={3}>Relational Databases & SQL</option>
-              <option value={4}>Spring Boot 3 Web Services</option>
-            </select>
+          <div className="max-w-md mx-auto space-y-3">
+            {loadingTopics ? (
+              <div className="flex justify-center py-4">
+                <LoadingSpinner />
+              </div>
+            ) : topics.length === 0 ? (
+              <p className="text-xs text-slate-500">No topics found. Please ensure courses are available.</p>
+            ) : (
+              <>
+                <select
+                  value={topicId}
+                  onChange={(e) => setTopicId(Number(e.target.value))}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                >
+                  {topics.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.courseTitle} - {t.title}
+                    </option>
+                  ))}
+                </select>
 
-            <button
-              onClick={() => startQuiz(topicId)}
-              disabled={starting}
-              className="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition-all"
-            >
-              {starting ? 'Calibrating Question Pool...' : 'Start Adaptive Quiz'}
-            </button>
+                <button
+                  onClick={() => startQuiz(topicId)}
+                  disabled={starting || !topicId}
+                  className="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition-all"
+                >
+                  {starting ? 'Calibrating Question Pool...' : 'Start Adaptive Quiz'}
+                </button>
+              </>
+            )}
           </div>
         </div>
       ) : isCompleted ? (

@@ -25,3 +25,27 @@ class AIProviderInterface(ABC):
         Generate multiple-choice practice/assessment questions.
         """
         pass
+
+    @abstractmethod
+    def summarize_content(
+        self,
+        text: str,
+        document_title: str = "Study Notes",
+        language: str = "english"
+    ) -> Dict[str, Any]:
+        """
+        Summarize document into executive summary, key takeaways, and flashcards.
+        """
+        pass
+
+    @abstractmethod
+    def generate_quiz_from_content(
+        self,
+        text: str,
+        count: int = 5,
+        difficulty: str = "INTERMEDIATE"
+    ) -> List[Dict[str, Any]]:
+        """
+        Generate multiple-choice quiz questions strictly grounded in the document text.
+        """
+        pass

@@ -27,6 +27,8 @@ public class RecommendationService {
     private final ProgressRepository progressRepository;
     private final TopicRepository topicRepository;
     private final QuizAttemptRepository quizAttemptRepository;
+    private final CourseRepository courseRepository;
+    private final StudentProfileRepository profileRepository;
     private final RestTemplate restTemplate;
 
     @Value("${ai-service.url:http://localhost:8000}")
@@ -76,7 +78,30 @@ public class RecommendationService {
         Map<Long, Progress> progressByTopic = progressList.stream()
                 .collect(Collectors.toMap(p -> p.getTopic().getId(), p -> p, (p1, p2) -> p1));
 
-        // 1. Check for Weak topics (mastery < 50% or KnowledgeLevel == WEAK) -> High priority review
+        // 1. Course Recommendation based on student interests & goals
+        Optional<StudentProfile> profileOpt = profileRepository.findByUserId(user.getId());
+        List<Course> allCourses = courseRepository.findAll();
+        if (!allCourses.isEmpty()) {
+            String interests = profileOpt.map(StudentProfile::getSubjectsOfInterest).orElse("AI, Python, Web");
+            Course matchedCourse = allCourses.stream()
+                    .filter(c -> interests != null && Arrays.stream(interests.split(","))
+                            .anyMatch(i -> c.getTitle().toLowerCase().contains(i.trim().toLowerCase()) || 
+                                           c.getCategory().toLowerCase().contains(i.trim().toLowerCase())))
+                    .findFirst()
+                    .orElse(allCourses.get(0));
+
+            newRecommendations.add(Recommendation.builder()
+                    .user(user)
+                    .recommendationType(RecommendationType.COURSE)
+                    .targetId(matchedCourse.getId())
+                    .title("Recommended Course: " + matchedCourse.getTitle())
+                    .reason("Aligned with your stated learning goals and career interests in " + matchedCourse.getCategory() + ".")
+                    .priorityScore(0.98)
+                    .createdAt(LocalDateTime.now())
+                    .build());
+        }
+
+        // 2. Check for Weak topics (mastery < 50% or KnowledgeLevel == WEAK) -> High priority review & Video walkthrough
         List<Progress> weakTopics = progressList.stream()
                 .filter(p -> p.getKnowledgeLevel() == KnowledgeLevel.WEAK || p.getMasteryScore() < 50.0)
                 .sorted(Comparator.comparingDouble(Progress::getMasteryScore))
@@ -86,11 +111,21 @@ public class RecommendationService {
         for (Progress wp : weakTopics) {
             newRecommendations.add(Recommendation.builder()
                     .user(user)
-                    .recommendationType(RecommendationType.RESOURCE)
+                    .recommendationType(RecommendationType.VIDEO)
                     .targetId(wp.getTopic().getId())
-                    .title("Review Core Material: " + wp.getTopic().getTitle())
-                    .reason("Your current mastery is " + wp.getMasteryScore() + "%. Revisiting lecture notes and cheat sheets will strengthen your foundation.")
-                    .priorityScore(0.95)
+                    .title("Video Masterclass: " + wp.getTopic().getTitle())
+                    .reason("Visual explanation and animated walkthrough to clarify difficult concepts (Current score: " + wp.getMasteryScore() + "%).")
+                    .priorityScore(0.96)
+                    .createdAt(LocalDateTime.now())
+                    .build());
+
+            newRecommendations.add(Recommendation.builder()
+                    .user(user)
+                    .recommendationType(RecommendationType.NOTE)
+                    .targetId(wp.getTopic().getId())
+                    .title("Study Notes & Cheat Sheet: " + wp.getTopic().getTitle())
+                    .reason("Consolidated revision notes and code patterns for quick concept reinforcement.")
+                    .priorityScore(0.92)
                     .createdAt(LocalDateTime.now())
                     .build());
 
@@ -99,13 +134,13 @@ public class RecommendationService {
                     .recommendationType(RecommendationType.QUIZ)
                     .targetId(wp.getTopic().getId())
                     .title("Practice Challenge: " + wp.getTopic().getTitle())
-                    .reason("Take a targeted adaptive quiz to solidify your weak areas and boost your score.")
+                    .reason("Targeted adaptive practice questions to solidify your weak areas and boost your mastery.")
                     .priorityScore(0.90)
                     .createdAt(LocalDateTime.now())
                     .build());
         }
 
-        // 2. Next Unlocked Topic in learning sequence
+        // 3. Next Unlocked Topic in learning sequence
         for (Topic topic : allTopics) {
             Progress prog = progressByTopic.get(topic.getId());
             if (prog == null || prog.getStatus() == ProgressStatus.NOT_STARTED) {
@@ -113,7 +148,7 @@ public class RecommendationService {
                         .user(user)
                         .recommendationType(RecommendationType.TOPIC)
                         .targetId(topic.getId())
-                        .title("Next Up: " + topic.getTitle())
+                        .title("Next Curriculum Topic: " + topic.getTitle())
                         .reason("You are ready to advance. This is the next structured step on your curriculum roadmap.")
                         .priorityScore(0.85)
                         .createdAt(LocalDateTime.now())
@@ -122,7 +157,7 @@ public class RecommendationService {
             }
         }
 
-        // 3. Developing Topics -> Quiz reinforcement
+        // 4. Developing Topics -> Quiz reinforcement
         List<Progress> developing = progressList.stream()
                 .filter(p -> p.getKnowledgeLevel() == KnowledgeLevel.DEVELOPING)
                 .limit(1)
@@ -135,7 +170,7 @@ public class RecommendationService {
                     .targetId(dev.getTopic().getId())
                     .title("Level Up to Proficient: " + dev.getTopic().getTitle())
                     .reason("You have a good grasp (" + dev.getMasteryScore() + "%). Scoring 70%+ on your next quiz will achieve Proficient status.")
-                    .priorityScore(0.75)
+                    .priorityScore(0.78)
                     .createdAt(LocalDateTime.now())
                     .build());
         }

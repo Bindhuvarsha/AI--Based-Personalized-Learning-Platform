@@ -125,3 +125,161 @@ class DeterministicMockAIProvider(AIProviderInterface):
                 "difficulty": diff_str
             }
         ][:count]
+
+    def summarize_content(
+        self,
+        text: str,
+        document_title: str = "Study Notes",
+        language: str = "english"
+    ) -> Dict[str, Any]:
+        words = text.split()
+        word_count = len(words)
+        read_time = max(1, word_count // 200)
+
+        # Extract sentences for summary
+        sentences = [s.strip() for s in text.replace("\n", " ").split(".") if len(s.strip()) > 15]
+        preview = ". ".join(sentences[:3]) + "." if len(sentences) >= 3 else text[:250] + "..."
+
+        lang = language.lower()
+        if lang == "hindi":
+            return {
+                "documentTitle": document_title,
+                "executiveSummary": f"यह दस्तावेज़ '{document_title}' से संबंधित मुख्य अध्ययन सामग्री का सारांश प्रस्तुत करता है। इसमें मुख्य सिद्धांतों, व्यावहारिक प्रयोगों और दक्षता सुधार पर ध्यान केंद्रित किया गया है।\n\n{preview}",
+                "keyTakeaways": [
+                    f"दस्तावेज़ की मूल अवधारणा: {sentences[0] if sentences else 'मौलिक सिद्धांतों का व्यवस्थित अध्ययन।'}",
+                    "जटिल समस्याओं को सरल घटकों में विभाजित करके दक्षता में सुधार।",
+                    "सैद्धांतिक ज्ञान को व्यावहारिक अभ्यास और परीक्षण के साथ सुदृढ़ करना।",
+                    "त्रुटि प्रबंधन और प्रदर्शन अनुकूलन को प्राथमिकता देना।"
+                ],
+                "flashcards": [
+                    {"term": "मुख्य सिद्धांत (Core Principle)", "definition": "दस्तावेज़ में उल्लिखित आधारभूत वैचारिक संरचना।"},
+                    {"term": "प्रणाली अनुकूलन (System Optimization)", "definition": "संसाधनों का न्यूनतम उपयोग और अधिकतम दक्षता प्राप्त करना।"},
+                    {"term": "सत्यापन विधि (Validation)", "definition": "परिणामों की सटीकता सुनिश्चित करने के लिए नियमित परीक्षण।"}
+                ],
+                "estimatedReadTimeMinutes": read_time,
+                "totalWords": word_count
+            }
+        elif lang == "kannada":
+            return {
+                "documentTitle": document_title,
+                "executiveSummary": f"ಈ ಸಾರಾಂಶವು '{document_title}' ಕುರಿತಾದ ಅಧ್ಯಯನ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿದೆ. ಮೂಲ ಪರಿಕಲ್ಪನೆಗಳು ಮತ್ತು ಪ್ರಾಯೋಗಿಕ ಅನುಷ್ಠಾನದ ಕುರಿತು ವಿವರಣೆ ಇಲ್ಲಿದೆ.\n\n{preview}",
+                "keyTakeaways": [
+                    f"ಪ್ರಮುಖ ಪರಿಕಲ್ಪನೆ: {sentences[0] if sentences else 'ವ್ಯವಸ್ಥಿತ ಅಧ್ಯಯನ ಕ್ರಮ.'}",
+                    "ದಕ್ಷತೆಯನ್ನು ಹೆಚ್ಚಿಸಲು ಸಮಸ್ಯೆಗಳನ್ನು ಸರಳಗೊಳಿಸಿ ಪರಿಹರಿಸುವುದು.",
+                    "ನಿರಂತರ ಅಭ್ಯಾಸ ಮತ್ತು ಪ್ರಾಯೋಗಿಕ ಪರೀಕ್ಷೆಯ ಮೂಲಕ ಜ್ಞಾನ ಬಲವರ್ಧನೆ.",
+                    "ದೋಷ ನಿರ್ವಹಣೆ ಮತ್ತು ಸುಧಾರಿತ ವಿನ್ಯಾಸ ತತ್ತ್ವಗಳು."
+                ],
+                "flashcards": [
+                    {"term": "ಮೂಲ ತತ್ತ್ವ (Core Principle)", "definition": "ವಿಷಯದ ಆಧಾರಭೂತ ಪರಿಕಲ್ಪನಾ ರಚನೆ."},
+                    {"term": "ದಕ್ಷತೆ (Efficiency)", "definition": "ಕನಿಷ್ಠ ಸಂಪನ್ಮೂಲಗಳೊಂದಿಗೆ ಗರಿಷ್ಠ ಫಲಿತಾಂಶ ಪಡೆಯುವುದು."},
+                    {"term": "ದೃಢೀಕರಣ (Validation)", "definition": "ನಿಖರತೆಯನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಲು ನಡೆಸುವ ಮೌಲ್ಯಮಾಪನ."}
+                ],
+                "estimatedReadTimeMinutes": read_time,
+                "totalWords": word_count
+            }
+        else:
+            return {
+                "documentTitle": document_title,
+                "executiveSummary": (
+                    f"This document summary synthesizes key conceptual frameworks and technical mechanisms from \"{document_title}\". "
+                    f"The analysis prioritizes architectural clarity, procedural execution, and core domain invariants.\n\n"
+                    f"Key Context: {preview}"
+                ),
+                "keyTakeaways": [
+                    f"Core Foundation: {sentences[0] if sentences else 'Systematic approach to domain fundamentals and invariants.'}",
+                    f"Operational Architecture: {sentences[1] if len(sentences) > 1 else 'Decomposition of complex tasks into modular and testable units.'}",
+                    f"Performance & Scale: {sentences[2] if len(sentences) > 2 else 'Algorithmic efficiency and low-latency throughput.'}",
+                    "Best Practices: Rigorous regression testing, comprehensive boundary check validation, and proactive error logging."
+                ],
+                "flashcards": [
+                    {
+                        "term": "Architectural Invariant",
+                        "definition": "A foundational property or condition that remains consistently true throughout all system states."
+                    },
+                    {
+                        "term": "Algorithmic Efficiency",
+                        "definition": "Minimizing asymptotic time and memory space overhead through optimal data structure selection."
+                    },
+                    {
+                        "term": "Modular Decomposition",
+                        "definition": "Partitioning complex software systems into decoupled, individually verifiable components."
+                    },
+                    {
+                        "term": "Defensive Validation",
+                        "definition": "Verifying input parameters and boundary thresholds to prevent invalid operational states."
+                    }
+                ],
+                "estimatedReadTimeMinutes": read_time,
+                "totalWords": word_count
+            }
+
+    def generate_quiz_from_content(
+        self,
+        text: str,
+        count: int = 5,
+        difficulty: str = "INTERMEDIATE"
+    ) -> List[Dict[str, Any]]:
+        diff_str = difficulty.upper()
+        sentences = [s.strip() for s in text.replace("\n", " ").split(".") if len(s.strip()) > 20]
+        sample_s1 = sentences[0] if len(sentences) > 0 else "Systematic modular design improves reliability"
+        sample_s2 = sentences[1] if len(sentences) > 1 else "Performance optimization requires caching and minimal allocations"
+        sample_s3 = sentences[2] if len(sentences) > 2 else "Defensive programming guarantees predictable failure handling"
+
+        questions = [
+            {
+                "questionText": f"Based on the uploaded study material, what is the primary conclusion regarding: \"{sample_s1[:80]}...\"?",
+                "options": [
+                    "It establishes an architectural foundation essential for reliability and scalability.",
+                    "It is considered obsolete and should be bypassed during execution.",
+                    "It solely increases latency without functional benefit.",
+                    "It only applies to legacy unmanaged hardware environments."
+                ],
+                "correctOptionIndex": 0,
+                "explanation": f"According to the text, this principle directly underpins structural correctness and system reliability.",
+                "difficulty": diff_str
+            },
+            {
+                "questionText": f"According to the provided notes, how is optimal throughput achieved in relation to: \"{sample_s2[:80]}...\"?",
+                "options": [
+                    "By eliminating automated testing suites.",
+                    "By utilizing caching, reducing redundant passes, and optimizing resource pipelines.",
+                    "By increasing thread contention and unconstrained memory buffers.",
+                    "By ignoring asymptotic boundary limits."
+                ],
+                "correctOptionIndex": 1,
+                "explanation": "The text emphasizes optimizing computational pipelines and minimizing redundant operations to maximize throughput.",
+                "difficulty": diff_str
+            },
+            {
+                "questionText": f"True or False: According to the document, {sample_s3[:75]} must be maintained under concurrent operations.",
+                "options": ["True", "False"],
+                "correctOptionIndex": 0,
+                "explanation": "The uploaded material highlights that maintaining defensive invariants is mandatory across all execution paths.",
+                "difficulty": diff_str
+            },
+            {
+                "questionText": "What diagnostic practice is recommended when encountering edge-case errors described in the notes?",
+                "options": [
+                    "Suppress all logging to reduce disk write bandwidth.",
+                    "Employ contextual error messages with explicit telemetry and assertions.",
+                    "Crash the host runtime silently.",
+                    "Assume inputs are always well-formed without validation."
+                ],
+                "correctOptionIndex": 1,
+                "explanation": "Contextual error logging and assertive boundary checks are standard practices emphasized in the material.",
+                "difficulty": diff_str
+            },
+            {
+                "questionText": "How does the document advise engineering teams to structure modular components for future maintenance?",
+                "options": [
+                    "Coupling all components into a single monolithic script.",
+                    "Decoupling concerns with explicit interfaces and independent unit tests.",
+                    "Relying exclusively on global shared state.",
+                    "Deprecating version control workflows."
+                ],
+                "correctOptionIndex": 1,
+                "explanation": "Decoupling concerns and writing targeted unit tests guarantees maintainability and prevents side-effect regressions.",
+                "difficulty": diff_str
+            }
+        ]
+        return questions[:count]

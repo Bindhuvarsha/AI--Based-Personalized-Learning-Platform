@@ -10,6 +10,7 @@ interface AuthContextType {
   register: (fullName: string, email: string, pass: string, role?: string) => Promise<void>;
   logout: () => Promise<void>;
   isStudent: boolean;
+  isTeacher: boolean;
   isAdmin: boolean;
 }
 
@@ -90,10 +91,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const isStudent = user ? user.roles.includes('ROLE_STUDENT') : false;
+  const isTeacher = user ? (user.roles.includes('ROLE_TEACHER') || user.roles.includes('ROLE_ADMIN')) : false;
   const isAdmin = user ? user.roles.includes('ROLE_ADMIN') : false;
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, isStudent, isAdmin }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, isStudent, isTeacher, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

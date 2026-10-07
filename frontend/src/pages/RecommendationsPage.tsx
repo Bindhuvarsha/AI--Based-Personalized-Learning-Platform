@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { RecommendationItem } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { Sparkles, Brain, BookOpen, Target, ArrowRight, RefreshCw, Filter } from 'lucide-react';
+import { Sparkles, Brain, BookOpen, Target, ArrowRight, RefreshCw, Filter, Video, FileText, Compass, PlayCircle } from 'lucide-react';
 
 export const RecommendationsPage: React.FC = () => {
   const [recommendations, setRecommendations] = useState<RecommendationItem[]>([]);
@@ -28,6 +28,10 @@ export const RecommendationsPage: React.FC = () => {
 
   const filtered = recommendations.filter(item => {
     if (filterType === 'ALL') return true;
+    if (filterType === 'COURSE') return item.type === 'COURSE' || item.type === 'TOPIC';
+    if (filterType === 'VIDEO') return item.type === 'VIDEO';
+    if (filterType === 'NOTE') return item.type === 'NOTE' || item.type === 'RESOURCE';
+    if (filterType === 'QUIZ') return item.type === 'QUIZ';
     return item.type === filterType;
   });
 
@@ -35,8 +39,13 @@ export const RecommendationsPage: React.FC = () => {
     switch (type) {
       case 'QUIZ':
         return <Brain className="w-5 h-5 text-violet-600" />;
+      case 'VIDEO':
+        return <Video className="w-5 h-5 text-rose-600" />;
+      case 'NOTE':
       case 'RESOURCE':
-        return <BookOpen className="w-5 h-5 text-amber-600" />;
+        return <FileText className="w-5 h-5 text-amber-600" />;
+      case 'COURSE':
+        return <Compass className="w-5 h-5 text-indigo-600" />;
       default:
         return <Target className="w-5 h-5 text-brand-600" />;
     }
@@ -46,8 +55,13 @@ export const RecommendationsPage: React.FC = () => {
     switch (type) {
       case 'QUIZ':
         return 'bg-violet-50 text-violet-700 border-violet-200';
+      case 'VIDEO':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      case 'NOTE':
       case 'RESOURCE':
         return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'COURSE':
+        return 'bg-indigo-50 text-indigo-700 border-indigo-200';
       default:
         return 'bg-brand-50 text-brand-700 border-brand-200';
     }
@@ -56,6 +70,12 @@ export const RecommendationsPage: React.FC = () => {
   const getActionLink = (item: RecommendationItem) => {
     if (item.type === 'QUIZ') {
       return `/quiz/${item.targetId}`;
+    }
+    if (item.type === 'COURSE') {
+      return `/courses/${item.targetId}`;
+    }
+    if (item.type === 'NOTE') {
+      return `/summarizer`;
     }
     return `/courses`;
   };
@@ -86,18 +106,24 @@ export const RecommendationsPage: React.FC = () => {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center space-x-2 border-b border-slate-200 pb-3">
-        {['ALL', 'TOPIC', 'QUIZ', 'RESOURCE'].map(t => (
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
+        {[
+          { id: 'ALL', label: 'All Suggestions' },
+          { id: 'COURSE', label: 'Courses & Topics' },
+          { id: 'VIDEO', label: 'Video Lessons' },
+          { id: 'NOTE', label: 'Notes & Guides' },
+          { id: 'QUIZ', label: 'Practice Quizzes' }
+        ].map(t => (
           <button
-            key={t}
-            onClick={() => setFilterType(t)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              filterType === t
+            key={t.id}
+            onClick={() => setFilterType(t.id)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              filterType === t.id
                 ? 'bg-brand-600 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            {t === 'ALL' ? 'All Items' : t}
+            {t.label}
           </button>
         ))}
       </div>
@@ -145,7 +171,17 @@ export const RecommendationsPage: React.FC = () => {
                   to={getActionLink(item)}
                   className="inline-flex items-center space-x-1 text-xs font-bold text-brand-600 hover:text-brand-700"
                 >
-                  <span>{item.type === 'QUIZ' ? 'Attempt Quiz' : 'Study Now'}</span>
+                  <span>
+                    {item.type === 'QUIZ'
+                      ? 'Practice Quiz'
+                      : item.type === 'VIDEO'
+                      ? 'Watch Video Lesson'
+                      : item.type === 'NOTE'
+                      ? 'Read Study Notes'
+                      : item.type === 'COURSE'
+                      ? 'View Full Course'
+                      : 'Study Topic'}
+                  </span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>

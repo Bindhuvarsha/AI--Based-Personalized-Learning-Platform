@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
@@ -7,12 +7,12 @@ import { PwaInstallBanner } from './PwaInstallBanner';
 
 export const DashboardLayout: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col relative overflow-x-hidden bg-slate-50">
+    <div className="h-screen flex flex-col overflow-hidden bg-slate-50">
       <Navbar />
       <PwaInstallBanner />
-      <div className="flex flex-1 relative">
+      <div className="flex flex-1 overflow-hidden relative">
         <Sidebar />
-        <main className="flex-1 p-3 sm:p-6 lg:p-8 pb-24 md:pb-8 overflow-y-auto relative z-10 w-full max-w-full">
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 pb-24 md:pb-8 overflow-y-auto relative z-10 w-full max-w-full focus:outline-none">
           <Outlet />
         </main>
       </div>

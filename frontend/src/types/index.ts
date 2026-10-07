@@ -1,9 +1,9 @@
-export type RoleType = 'ROLE_STUDENT' | 'ROLE_ADMIN';
+export type RoleType = 'ROLE_STUDENT' | 'ROLE_TEACHER' | 'ROLE_ADMIN';
 export type DifficultyLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 export type LanguagePreference = 'ENGLISH' | 'HINDI' | 'KANNADA';
 export type KnowledgeLevel = 'WEAK' | 'DEVELOPING' | 'PROFICIENT' | 'ADVANCED';
 export type ProgressStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
-export type RecommendationType = 'TOPIC' | 'QUIZ' | 'RESOURCE';
+export type RecommendationType = 'TOPIC' | 'QUIZ' | 'RESOURCE' | 'COURSE' | 'VIDEO' | 'NOTE';
 export type QuestionType = 'MULTIPLE_CHOICE' | 'TRUE_FALSE';
 export type MaterialType = 'DOCUMENT' | 'ARTICLE' | 'VIDEO_LINK' | 'NOTE';
 

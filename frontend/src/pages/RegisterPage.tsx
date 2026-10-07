@@ -10,6 +10,7 @@ export const RegisterPage: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<'STUDENT' | 'TEACHER' | 'ADMIN'>('STUDENT');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
@@ -29,9 +30,15 @@ export const RegisterPage: React.FC = () => {
     }
     setLoading(true);
     try {
-      await register(fullName, email, password, 'STUDENT');
-      showToast('Account created! Welcome to LearnPath AI.', 'success');
-      navigate('/onboarding');
+      await register(fullName, email, password, role);
+      showToast(`Account created as ${role.toLowerCase()}! Welcome to LearnPath AI.`, 'success');
+      if (role === 'TEACHER') {
+        navigate('/teacher-dashboard');
+      } else if (role === 'ADMIN') {
+        navigate('/admin');
+      } else {
+        navigate('/onboarding');
+      }
     } catch (err: any) {
       showToast(err.response?.data?.message || 'Registration failed', 'error');
     } finally {
@@ -122,6 +129,48 @@ export const RegisterPage: React.FC = () => {
                   </button>
                 }
               />
+
+              {/* Role Selection */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                  Select Your Account Role
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRole('STUDENT')}
+                    className={`py-2 px-2 text-xs font-semibold rounded-xl border transition-all ${
+                      role === 'STUDENT'
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                        : 'bg-white/60 text-slate-700 border-slate-200 hover:bg-white'
+                    }`}
+                  >
+                    Student
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole('TEACHER')}
+                    className={`py-2 px-2 text-xs font-semibold rounded-xl border transition-all ${
+                      role === 'TEACHER'
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                        : 'bg-white/60 text-slate-700 border-slate-200 hover:bg-white'
+                    }`}
+                  >
+                    Teacher
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole('ADMIN')}
+                    className={`py-2 px-2 text-xs font-semibold rounded-xl border transition-all ${
+                      role === 'ADMIN'
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                        : 'bg-white/60 text-slate-700 border-slate-200 hover:bg-white'
+                    }`}
+                  >
+                    Admin
+                  </button>
+                </div>
+              </div>
 
               <GlassButton
                 type="submit"

@@ -59,6 +59,12 @@ public class AuthService {
             if (adminRole != null) {
                 roles.add(adminRole);
             }
+        } else if ("TEACHER".equalsIgnoreCase(request.getRole()) || "INSTRUCTOR".equalsIgnoreCase(request.getRole()) || "FACULTY".equalsIgnoreCase(request.getRole())) {
+            Role teacherRole = roleRepository.findByName(RoleType.ROLE_TEACHER)
+                    .orElseGet(() -> roleRepository.save(Role.builder().name(RoleType.ROLE_TEACHER).build()));
+            if (teacherRole != null) {
+                roles.add(teacherRole);
+            }
         } else {
             Role studentRole = roleRepository.findByName(RoleType.ROLE_STUDENT)
                     .orElseGet(() -> roleRepository.save(Role.builder().name(RoleType.ROLE_STUDENT).build()));

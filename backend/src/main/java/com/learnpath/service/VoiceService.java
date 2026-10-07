@@ -64,14 +64,14 @@ public class VoiceService {
         if (transcript == null) {
             String originalName = audioFile != null ? audioFile.getOriginalFilename() : "";
             if (originalName != null && originalName.contains("sample")) {
-                transcript = "What is the difference between an interface and an abstract class in Java?";
+                transcript = "Can you explain how prerequisite concepts in the knowledge graph unlock subsequent advanced topics?";
             } else {
-                transcript = "Could you explain how prerequisite concepts in the knowledge graph unlock subsequent advanced topics?";
+                transcript = "Could you explain the key concepts of my current learning topic and provide study guidance?";
             }
         }
 
         // Generate dynamic intelligent tutor voice response via TutorService
-        String aiReply;
+        String aiReply = null;
         List<String> sources = new ArrayList<>();
         try {
             LanguagePreference pref;
@@ -97,12 +97,17 @@ public class VoiceService {
             }
         } catch (Exception e) {
             log.warn("Direct tutor call failed, using multilingual fallback: {}", e.getMessage());
+        }
+
+        if (aiReply == null || aiReply.trim().isEmpty()) {
             if ("KANNADA".equals(lang)) {
                 aiReply = "ಜ್ಞಾನ ಗ್ರಾಫ್‌ನಲ್ಲಿ (Knowledge Graph), ನೀವು ಮೂಲ ಪರಿಕಲ್ಪನೆಯನ್ನು ಕರಗತ ಮಾಡಿಕೊಂಡಾಗ, ಅದರ ನಂತರದ ಸುಧಾರಿತ ವಿಷಯಗಳು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಅನ್‌ಲಾಕ್ ಆಗುತ್ತವೆ.";
             } else if ("HINDI".equals(lang)) {
                 aiReply = "नॉलेज ग्राफ में, जब आप किसी मुख्य अवधारणा में 70% से अधिक महारत हासिल कर लेते हैं, तो संबंधित उन्नत विषय अनलॉक हो जाते हैं।";
             } else {
-                aiReply = "In LearnPath AI, your learning journey is personalized through prerequisite graphs. Mastering fundamentals unlocks subsequent topics seamlessly.";
+                aiReply = "Here is an explanation regarding \"" + transcript + "\":\n\n"
+                        + "This concept is fundamental to your current roadmap topic. The core principles involve breaking down problems systematically, validating assumptions with empirical checks, and applying deliberate practice.\n\n"
+                        + "Source citations have been retrieved from your active documents below for direct reference.";
             }
         }
 

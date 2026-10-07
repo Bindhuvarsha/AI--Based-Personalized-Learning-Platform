@@ -40,6 +40,10 @@ import { StudyPlannerPage } from './pages/StudyPlannerPage';
 import { EarlyWarningPage } from './pages/EarlyWarningPage';
 import { CareerRoadmapPage } from './pages/CareerRoadmapPage';
 import { ResumeAnalyzerPage } from './pages/ResumeAnalyzerPage';
+import { DocSummarizerPage } from './pages/DocSummarizerPage';
+import { CertificatesPage } from './pages/CertificatesPage';
+import { CertificateVerifyPage } from './pages/CertificateVerifyPage';
+import { TeacherDashboardPage } from './pages/TeacherDashboardPage';
 
 export const App: React.FC = () => {
   return (
@@ -53,6 +57,7 @@ export const App: React.FC = () => {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/verify/:certificateId" element={<CertificateVerifyPage />} />
 
               {/* Protected Student Setup */}
               <Route element={<ProtectedRoute />}>
@@ -90,6 +95,9 @@ export const App: React.FC = () => {
                   <Route path="/early-warning" element={<EarlyWarningPage />} />
                   <Route path="/career-roadmap" element={<CareerRoadmapPage />} />
                   <Route path="/resume-analyzer" element={<ResumeAnalyzerPage />} />
+                  <Route path="/summarizer" element={<DocSummarizerPage />} />
+                  <Route path="/certificates" element={<CertificatesPage />} />
+                  <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
                 </Route>
               </Route>
 

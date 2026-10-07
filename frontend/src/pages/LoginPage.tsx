@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Navbar } from '../components/Navbar';
 import { GlassCard, GlassButton, GlassInput } from '../components/GlassUI';
-import { BookOpen, Eye, EyeOff, ShieldCheck, GraduationCap } from 'lucide-react';
+import { BookOpen, Eye, EyeOff, ShieldCheck, GraduationCap, Users } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -129,9 +129,9 @@ export const LoginPage: React.FC = () => {
             {/* Quick Demo Section */}
             <div className="mt-7 pt-6 border-t border-slate-200/70">
               <p className="text-xs font-medium text-slate-500 text-center mb-3">
-                Quick demo login (development only)
+                Quick demo login (Development only)
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <GlassButton
                   type="button"
                   variant="student"
@@ -139,9 +139,20 @@ export const LoginPage: React.FC = () => {
                   disabled={loading}
                   onClick={() => autofill('student@example.com', 'Student@123')}
                   icon={<GraduationCap className="w-3.5 h-3.5" />}
-                  className="w-full py-2.5"
+                  className="w-full py-2 px-1 text-xs"
                 >
-                  Student Demo
+                  Student
+                </GlassButton>
+                <GlassButton
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  disabled={loading}
+                  onClick={() => autofill('teacher@example.com', 'Teacher@123')}
+                  icon={<Users className="w-3.5 h-3.5 text-indigo-500" />}
+                  className="w-full py-2 px-1 text-xs"
+                >
+                  Teacher
                 </GlassButton>
                 <GlassButton
                   type="button"
@@ -150,9 +161,9 @@ export const LoginPage: React.FC = () => {
                   disabled={loading}
                   onClick={() => autofill('admin@example.com', 'Admin@123')}
                   icon={<ShieldCheck className="w-3.5 h-3.5" />}
-                  className="w-full py-2.5"
+                  className="w-full py-2 px-1 text-xs"
                 >
-                  Admin Demo
+                  Admin
                 </GlassButton>
               </div>
             </div>

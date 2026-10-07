@@ -15,4 +15,6 @@ public interface EarlyWarningRepository extends JpaRepository<EarlyWarning, Long
     List<EarlyWarning> findByUserIdAndIsDismissedFalseOrderBySeverityDesc(@Param("userId") Long userId);
 
     List<EarlyWarning> findByUserIdOrderByCreatedAtDesc(Long userId);
+
+    List<EarlyWarning> findByIsDismissedFalse();
 }

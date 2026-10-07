@@ -33,9 +33,10 @@ graph TD
 
 ## 🔑 Quick Demo Credentials (Pre-Seeded)
 
-| Role | Email | Password | Permissions |
+| Role | Email | Password | Permissions & Features |
 | :--- | :--- | :--- | :--- |
 | **Student** | `student@example.com` | `Student@123` | Roadmaps, Diagnostic Assessments, Adaptive Quizzes, RAG AI Tutor, Analytics, Study Planner |
+| **Teacher** | `teacher@example.com` | `Teacher@123` | Cohort Performance Telemetry, Score Bell Curves, Concept Bottlenecks, At-Risk Interventions |
 | **Admin** | `admin@example.com` | `Admin@123` | Curriculum Management, Course Creation & Publishing, Topic & Question Management |
 
 ---
@@ -99,71 +100,72 @@ npm run dev
 
 ---
 
-## 🌟 Advanced AI Features Suite (15 End-to-End Capabilities)
+## 🌟 The Complete 20 AI Features Suite
 
-LearnPath AI includes 15 interconnected, production-ready AI capabilities spanning frontend, backend, AI microservice, and database:
+LearnPath AI delivers a comprehensive, production-grade ecosystem covering all 20 key capabilities:
 
-1. **AI Personal Mentor (`/mentor`)**:
-   - 24/7 dedicated coach maintaining conversation context and learning telemetry.
-   - Socratic guidance, daily study advice, weekly progress reviews, and metric citations.
-   - Multilingual interaction in English, Kannada, and Hindi.
+| # | Feature | What it adds to your project | Live Route / Component | Architecture Implementation |
+|---|---|---|---|---|
+| **1** | **AI-Powered Learning Recommendations** | Recommends courses/topics based on the student's performance and interests | [`/recommendations`](file:///frontend/src/pages/RecommendationsPage.tsx) | `RecommendationService.java`, `ml_routes.py` (Scikit-Learn RandomForest & KMeans) |
+| **2** | **Personalized Learning Path** | Automatically creates a study plan for each student | [`/study-plan`](file:///frontend/src/pages/StudyPlanPage.tsx), [`/study-planner`](file:///frontend/src/pages/StudyPlannerPage.tsx) | `StudyPlanService.java`, `StudyPlannerService.java`, milestone calendar generation |
+| **3** | **AI Quiz Generator** | Generates quizzes/questions from uploaded study material | [`/summarizer`](file:///frontend/src/pages/DocSummarizerPage.tsx) | `DocumentAiController.java`, `generator_routes.py`, grounded MCQs with full explanations |
+| **4** | **Adaptive Difficulty** | Increases/decreases question difficulty based on performance | [`/quiz/adaptive`](file:///frontend/src/pages/AdaptiveQuizPage.tsx) | `AdaptiveQuizService.java`, 3-tier dynamic calibration based on consecutive answers |
+| **5** | **Performance Prediction** | Predicts student performance using ML | [`/behavior`](file:///frontend/src/pages/BehaviorPredictionPage.tsx) | `LearningBehaviorService.java`, `behavior_routes.py`, struggle probability & burnout risk |
+| **6** | **AI Tutor / Chatbot** | Allows students to ask questions and receive personalized explanations | [`/tutor`](file:///frontend/src/pages/TutorPage.tsx), [`/mentor`](file:///frontend/src/pages/MentorPage.tsx) | RAG vector store retrieval, source citations, Socratic coaching personas |
+| **7** | **Multilingual Support** | Provides learning content and explanations in multiple languages | Top Navbar language switcher | `LanguageContext.tsx`, translations in English, Hindi (हिन्दी), and Kannada (ಕನ್ನಡ) |
+| **8** | **Voice-Based Learning** | Speech-to-text and text-to-speech interaction | [`/voice-tutor`](file:///frontend/src/pages/VoiceTutorPage.tsx) | `VoiceController.java`, `voice_routes.py`, Web Audio MediaRecorder & SpeechSynthesis |
+| **9** | **Weak-Topic Detection** | Identifies subjects/topics where the student is struggling | [`/dashboard`](file:///frontend/src/pages/DashboardPage.tsx), [`/early-warning`](file:///frontend/src/pages/EarlyWarningPage.tsx) | `AnalyticsService.java`, mastery gap classification (`WEAK`, `DEVELOPING`), 1-click remediation |
+| **10** | **Progress Dashboard** | Shows scores, progress, strengths, weaknesses and learning time | [`/dashboard`](file:///frontend/src/pages/DashboardPage.tsx) | Active learning minutes tracking, average scores, strength matrix, and weak-topic detection |
+| **11** | **Recommendation Engine** | Suggests videos, courses, notes and practice questions | [`/recommendations`](file:///frontend/src/pages/RecommendationsPage.tsx) | Multi-category suggestions (Videos, Courses, Study Notes, Adaptive Practice) |
+| **12** | **Gamification** | Points, badges, levels, streaks and leaderboards | [`/gamification`](file:///frontend/src/pages/GamificationPage.tsx) | `GamificationService.java`, XP ledger, tiers (Novice to Master), streaks, unlockable badges |
+| **13** | **Teacher/Admin Dashboard** | Allows teachers to monitor student performance | [`/teacher-dashboard`](file:///frontend/src/pages/TeacherDashboardPage.tsx), [`/admin`](file:///frontend/src/pages/AdminDashboardPage.tsx) | Cohort score bell curves, concept bottlenecks, early warnings, one-click interventions |
+| **14** | **Automated Feedback** | Gives AI-generated feedback after quizzes/assignments | [`/assignments`](file:///frontend/src/pages/AssignmentPage.tsx), [`/quiz/adaptive`](file:///frontend/src/pages/AdaptiveQuizPage.tsx) | Rubric evaluations, scored criterion breakdowns, quoted evidence, instant quiz explanations |
+| **15** | **Learning Analytics** | Analyzes student behavior and learning patterns | [`/analytics`](file:///frontend/src/pages/AnalyticsPage.tsx) | Recharts interactive dashboards, quiz score trends, retention radar, mastery distribution |
+| **16** | **Resume/Certificate Generation** | Generates certificates after completing courses & Resume Analyzer | [`/certificates`](file:///frontend/src/pages/CertificatesPage.tsx), [`/resume-analyzer`](file:///frontend/src/pages/ResumeAnalyzerPage.tsx) | Cryptographic SHA-256 hash verifiable certificates (`/verify/:id`) and skill-gap analyzer |
+| **17** | **Cloud Database** | Stores user profiles, progress and learning history | `PostgreSQL 16` / `application.yml` | Spring Data JPA, Hibernate DDL, Supabase / AWS RDS / Neon / Railway cloud compatibility |
+| **18** | **Authentication & Authorization** | Student/Teacher/Admin roles with secure login | [`/login`](file:///frontend/src/pages/LoginPage.tsx), [`/register`](file:///frontend/src/pages/RegisterPage.tsx) | JWT authentication filter, BCrypt salted hashing, `ROLE_STUDENT`, `ROLE_TEACHER`, `ROLE_ADMIN` |
+| **19** | **Mobile Application** | Extends the platform to Android/iOS | [`capacitor.config.json`](file:///frontend/capacitor.config.json), `manifest.json` | Responsive Tailwind SPA, PWA install prompt, Capacitor Android & iOS native builds |
+| **20** | **AI Content Summarization** | Converts lengthy notes/PDFs into concise study material | [`/summarizer`](file:///frontend/src/pages/DocSummarizerPage.tsx) | PyMuPDF parsing, executive synthesis, key conceptual invariants, interactive flashcards |
 
-2. **Voice AI Tutor (`/voice-tutor`)**:
-   - Voice question recording via Web Audio MediaRecorder API.
-   - Speech-to-text (STT) transcription and audio response synthesis (TTS).
-   - Grounded explanations with cited knowledge-base references.
+---
 
-3. **Multilingual Support (English, Kannada, Hindi)**:
-   - Dynamic language switcher in top navigation bar (`Navbar.tsx`).
-   - Seamless translations across UI text, mentor prompts, and tutoring responses.
+## 📱 Mobile Application Deployment (Android & iOS)
 
-4. **Image-Based Question Solving (`/image-solver`)**:
-   - Upload photos or screenshots of math equations, coding problems, or diagrams.
-   - OCR text extraction, formula derivations, step-by-step reasoning, and confidence estimation.
+The frontend is fully responsive, PWA-enabled, and configured for Capacitor native mobile builds:
 
-5. **Interactive Knowledge Graph (`/knowledge-graph`)**:
-   - Directed Acyclic Graph (DAG) concept dependency network.
-   - Real-time concept status classification: `MASTERED`, `DEVELOPING`, `WEAK`, `LOCKED`, and `RECOMMENDED`.
-   - Cycle prevention validation for concept relations.
+### 1. Progressive Web App (PWA)
+- Automatic install banner prompts on Android Chrome and iOS Safari.
+- Offline static caching with service worker (`sw.js`).
+- Standalone app-like windowing via `manifest.json`.
 
-6. **Learning Behavior Prediction (`/behavior`)**:
-   - Continuous learner snapshot telemetry tracking assessment trends, drop-off risks, and burnout likelihood.
-   - Explainable ML struggle prediction with targeted pedagogical interventions.
+### 2. Native Android / iOS Build with Capacitor
+```bash
+cd frontend
+npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/ios
+npm run build
 
-7. **Adaptive Quizzes (`/quiz/adaptive`)**:
-   - Dynamic difficulty calibration (Beginner, Intermediate, Advanced) adjusting after consecutive correct/incorrect answers.
-   - Confidence-rated testing with post-quiz topic mastery recalculation.
+# Add Android native project
+npx cap add android
+npx cap open android  # Opens in Android Studio to build APK/Bundle
 
-8. **Assignment Evaluator & Rubrics (`/assignments`)**:
-   - Multi-criteria rubric evaluation with strengths, weaknesses, and quoted feedback.
-   - Instructor score override and human feedback integration.
+# Add iOS native project (macOS)
+npx cap add ios
+npx cap open ios      # Opens in Xcode
+```
 
-9. **AI Coding Tutor & Sandboxed Reviewer (`/coding-tutor`)**:
-   - Interactive coding environment for Java and Python exercises.
-   - Automated execution against test suites, Big-O time/space complexity analysis, syntax error diagnostics, and code diff suggestions.
+---
 
-10. **Gamification Ecosystem (`/gamification`)**:
-    - Idempotent XP transactions, tiered student levels (Novice Explorer to Master Architect), streak tracking, unlockable achievement badges, and global leaderboards.
+## ☁️ Cloud Database Configuration (PostgreSQL / Supabase / Neon / AWS RDS)
 
-11. **AI Cohort Study Groups (`/study-groups`)**:
-    - Peer discovery filtered by career goal and focus area.
-    - Cohort discussion boards, shared study goals, and AI-moderated study recommendations.
+To point the backend to an external cloud database, simply provide your connection string in `.env` or as environment variables:
 
-12. **Intelligent Spaced-Repetition Study Planner (`/study-planner`)**:
-    - Automatic schedule generation matching student availability and target milestones.
-    - Interactive session completion toggle and automated catch-up rescheduling for missed days.
-
-13. **Academic Early Warning System (`/early-warning`)**:
-    - Real-time detection of score drops, inactivity, and struggling concept nodes.
-    - Severity-graded warnings (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`) with one-click action plans and notification center.
-
-14. **AI Career Roadmap Generator (`/career-roadmap`)**:
-    - Career readiness scoring for target tech roles (Backend Java, Full-Stack, AI Engineer).
-    - Step-by-step milestone check-lists and portfolio capstone project recommendations.
-
-15. **Resume Skill-Gap Analyzer (`/resume-analyzer`)**:
-    - Upload resumes in PDF, DOCX, or TXT format with automated skill extraction.
-    - Target job benchmarking with match percentage, 3-column breakdown (Matched, Partial, Missing), and GDPR-compliant data deletion.
+```bash
+# Example: Neon / Supabase / AWS RDS PostgreSQL URI
+SPRING_PROFILES_ACTIVE=prod
+SPRING_DATASOURCE_URL=jdbc:postgresql://<your-cloud-db-host>:5432/learnpath_db?sslmode=require
+SPRING_DATASOURCE_USERNAME=<your-db-username>
+SPRING_DATASOURCE_PASSWORD=<your-db-password>
+```
 
 ---
 
@@ -171,8 +173,9 @@ LearnPath AI includes 15 interconnected, production-ready AI capabilities spanni
 
 - Stateless JWT access tokens (24h) and refresh tokens (7d).
 - Passwords salted and hashed with BCrypt.
-- Role-based authorization (`ROLE_STUDENT`, `ROLE_ADMIN`).
+- Role-based authorization (`ROLE_STUDENT`, `ROLE_TEACHER`, `ROLE_ADMIN`).
 - Zero secret leak policy: all keys managed through `.env` and environment variables.
 - Comprehensive AI audit logging (`AIAuditService`) capturing model version, prompt ID, latency, user ID, and correlation IDs.
 - Deterministic local mock AI fallback ensures full offline capability without requiring third-party API keys.
+
 
